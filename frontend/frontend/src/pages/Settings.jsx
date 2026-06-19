@@ -385,7 +385,7 @@ if (loading) {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold mb-1">Simulated Logo URL</label>
+                <label className="block text-xs font-semibold mb-1">Logo URL</label>
                 <input
                   type="text"
                   value={compLogoUrl}

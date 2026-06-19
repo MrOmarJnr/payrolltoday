@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState,useRef } from "react";
 import {
   Search,
   UserPlus,
@@ -8,6 +8,8 @@ import {
   Eye,
   X,
   Save,
+  Upload,
+  Download,
 } from "lucide-react";
 import api from "../services/api";
 
@@ -319,6 +321,56 @@ export default function Employees() {
     return matchesSearch && matchesDept && matchesStatus && matchesType;
   });
 
+  const fileInputRef = useRef(null);
+
+  const downloadTemplate = () => {
+  window.open(
+    "/templates/employee-import-template.csv",
+    "_blank"
+  );
+};
+
+const handleImport = async (e) => {
+  const file = e.target.files[0];
+
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response = await api.post(
+      "/employees/import",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    alert(
+`Import Complete
+
+Created: ${response.data.created}
+Updated: ${response.data.updated}`
+    );
+
+    await loadData();
+
+    e.target.value = "";
+
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      error?.response?.data?.message ||
+      error?.message ||
+      "Import failed"
+    );
+  }
+};
+
   if (loading) {
     return (
       <div className="bg-white rounded-xl border border-slate-200 p-8 text-sm text-slate-500">
@@ -339,13 +391,48 @@ export default function Employees() {
           </p>
         </div>
 
-        <button
-          onClick={handleOpenCreate}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded font-medium flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
-        >
-          <UserPlus size={14} />
-          Add Employee
-        </button>
+     
+
+
+
+<div className="flex items-center gap-2">
+
+  <button
+    onClick={downloadTemplate}
+    className="bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2 rounded gap-2 flex items-center"
+  >
+    <Download size={14} />
+    Download Template
+  </button>
+
+  <button
+    onClick={() => fileInputRef.current.click()}
+    className="bg-amber-600 hover:bg-amber-700 text-white text-xs px-4 py-2 rounded gap-2 flex items-center"
+  >
+    <Upload size={14} />
+    Import Employees
+  </button>
+
+  <input
+    type="file"
+    accept=".xlsx,.xls,.csv"
+    ref={fileInputRef}
+    hidden
+    onChange={handleImport}
+  />
+
+  <button
+    onClick={handleOpenCreate}
+    className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded flex items-center gap-2"
+  >
+    <UserPlus size={14} />
+    Add Employee
+  </button>
+
+</div>
+
+
+
       </div>
 
       <div className="bg-white p-4 rounded border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">

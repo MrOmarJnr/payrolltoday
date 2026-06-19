@@ -1,0 +1,2 @@
+employee_id,first_name,last_name,other_names,gender,date_of_birth,phone_number,email,address,date_employed,department_id,position,employment_type,bank_name,bank_account,ssnit_number,ghana_card_number,status,basic_salary,transport_allowance,housing_allowance,utility_allowance,risk_allowance,other_allowances,other_deductions
+LSEMP001,John,Doe,,Male,1990-01-01,0240000000,john@company.com,Accra,2025-01-01,IT,System Administrator,Full-Time,GCB,123456,SSN001,GHA001,Active,5000,500,500,200,0,0,0

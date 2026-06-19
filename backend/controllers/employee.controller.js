@@ -1,5 +1,8 @@
 const pool = require("../config/db");
 
+const XLSX = require("xlsx");
+const fs = require("fs");
+
 /*
 |--------------------------------------------------------------------------
 | GET EMPLOYEES
@@ -452,7 +455,233 @@ ON DUPLICATE KEY UPDATE
   }
 };
 
+/*
+|--------------------------------------------------------------------------
+| IMPORT EMPLOYEE
+|--------------------------------------------------------------------------
+*/
 
+const importEmployees = async (req, res) => {
+  const conn = await pool.getConnection();
+
+  try {
+    await conn.beginTransaction();
+
+    const workbook = XLSX.readFile(req.file.path);
+
+    const sheet =
+      workbook.Sheets[
+        workbook.SheetNames[0]
+      ];
+
+    const rows =
+      XLSX.utils.sheet_to_json(sheet);
+
+    let created = 0;
+    let updated = 0;
+
+    for (const row of rows) {
+
+      const employeeId =
+        String(row.employee_id).trim();
+
+      const [existing] =
+        await conn.query(
+          `
+          SELECT id
+          FROM employees
+          WHERE id = ?
+          `,
+          [employeeId]
+        );
+
+      if (existing.length > 0) {
+
+        await conn.query(
+          `
+          UPDATE employees
+          SET
+            first_name=?,
+            last_name=?,
+            other_names=?,
+            gender=?,
+            date_of_birth=?,
+            phone_number=?,
+            email=?,
+            address=?,
+            date_employed=?,
+            department_id=?,
+            position=?,
+            employment_type=?,
+            bank_name=?,
+            bank_account=?,
+            ssnit_number=?,
+            ghana_card_number=?,
+            status=?
+          WHERE id=?
+          `,
+          [
+            row.first_name,
+            row.last_name,
+            row.other_names,
+            row.gender,
+            row.date_of_birth,
+            row.phone_number,
+            row.email,
+            row.address,
+            row.date_employed,
+            row.department_id,
+            row.position,
+            row.employment_type,
+            row.bank_name,
+            row.bank_account,
+            row.ssnit_number,
+            row.ghana_card_number,
+            row.status,
+            employeeId
+          ]
+        );
+
+        await conn.query(
+          `
+          UPDATE salary_setups
+          SET
+            basic_salary=?,
+            transport_allowance=?,
+            housing_allowance=?,
+            utility_allowance=?,
+            risk_allowance=?,
+            other_allowances=?,
+            other_deductions=?
+          WHERE employee_id=?
+          `,
+          [
+            row.basic_salary || 0,
+            row.transport_allowance || 0,
+            row.housing_allowance || 0,
+            row.utility_allowance || 0,
+            row.risk_allowance || 0,
+            row.other_allowances || 0,
+            row.other_deductions || 0,
+            employeeId
+          ]
+        );
+
+        updated++;
+
+      } else {
+
+        await conn.query(
+          `
+          INSERT INTO employees
+          (
+            id,
+            first_name,
+            last_name,
+            other_names,
+            gender,
+            date_of_birth,
+            phone_number,
+            email,
+            address,
+            date_employed,
+            department_id,
+            position,
+            employment_type,
+            bank_name,
+            bank_account,
+            ssnit_number,
+            ghana_card_number,
+            status
+          )
+          VALUES
+          (
+            ?,?,?,?,?,?,?,?,?,?,
+            ?,?,?,?,?,?,?,?
+          )
+          `,
+          [
+            employeeId,
+            row.first_name,
+            row.last_name,
+            row.other_names,
+            row.gender,
+            row.date_of_birth,
+            row.phone_number,
+            row.email,
+            row.address,
+            row.date_employed,
+            row.department_id,
+            row.position,
+            row.employment_type,
+            row.bank_name,
+            row.bank_account,
+            row.ssnit_number,
+            row.ghana_card_number,
+            row.status
+          ]
+        );
+
+        await conn.query(
+          `
+          INSERT INTO salary_setups
+          (
+            employee_id,
+            basic_salary,
+            transport_allowance,
+            housing_allowance,
+            utility_allowance,
+            risk_allowance,
+            other_allowances,
+            other_deductions
+          )
+          VALUES
+          (
+            ?,?,?,?,?,?,?,?
+          )
+          `,
+          [
+            employeeId,
+            row.basic_salary || 0,
+            row.transport_allowance || 0,
+            row.housing_allowance || 0,
+            row.utility_allowance || 0,
+            row.risk_allowance || 0,
+            row.other_allowances || 0,
+            row.other_deductions || 0
+          ]
+        );
+
+        created++;
+      }
+    }
+
+    fs.unlinkSync(req.file.path);
+
+    await conn.commit();
+
+    return res.json({
+      success: true,
+      created,
+      updated,
+      total: rows.length
+    });
+
+  } catch (error) {
+
+    await conn.rollback();
+
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  } finally {
+    conn.release();
+  }
+};
 
 module.exports = {
   getEmployees,
@@ -460,4 +689,5 @@ module.exports = {
   createEmployee,
   updateEmployee,
   deleteEmployee,
+  importEmployees
 };

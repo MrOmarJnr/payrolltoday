@@ -348,12 +348,7 @@ export default function Dashboard() {
             <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
               <Clock size={36} className="text-slate-300 mb-2" />
               <p className="text-slate-500 text-sm font-medium">No biometric punch files imported today</p>
-              <button 
-                onClick={() => onNavigateToTab('attendance')}
-                className="mt-3 text-xs bg-blue-600 hover:bg-blue-700 text-white font-medium px-3.5 py-1.5 rounded transition-colors"
-              >
-                Import Hikvision Log
-              </button>
+             
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -448,7 +443,7 @@ export default function Dashboard() {
             </h4>
             
             {upcomingBirthdays.length === 0 ? (
-              <p className="text-slate-400 text-xs py-4 text-center">No staff birthdays in June or July.</p>
+              <p className="text-slate-400 text-xs py-4 text-center">No staff birthdays.</p>
             ) : (
               <div className="space-y-3 max-h-56 overflow-y-auto pr-1">
                 {upcomingBirthdays.map((item, idx) => (

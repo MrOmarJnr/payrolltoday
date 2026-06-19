@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import api from "../services/api";
+import logo from "../assets/logo.png";
 
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState("");
@@ -73,7 +74,7 @@ const handleSubmit = async (e) => {
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/15 backdrop-blur flex items-center justify-center overflow-hidden shadow-lg">
               <img
-                src="/logo.png"
+                src={logo}
                 alt="LEF Signature LTD"
                 className="w-full h-full object-contain"
               />
@@ -144,7 +145,7 @@ const handleSubmit = async (e) => {
                 <div className="text-center mb-7">
                   <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-slate-900 flex items-center justify-center shadow-lg shadow-blue-600/20 mb-5 overflow-hidden p-2">
                     <img
-                      src="/whitelogo.png"
+                      src={logo}
                       alt="LEF Signature LTD"
                       className="w-full h-full object-contain"
                     />

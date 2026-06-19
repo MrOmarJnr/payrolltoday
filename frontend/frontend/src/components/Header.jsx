@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { User, Settings, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Header({
   authUser,
@@ -42,14 +43,19 @@ export default function Header({
 
         {userMenuOpen && (
           <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
-            <button className="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-slate-50">
+            <button className="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-slate-50"
+            >
               <User size={16} />
               My Profile
+              
+              
             </button>
 
             <button className="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-slate-50">
+       
               <Settings size={16} />
               Account Settings
+             
             </button>
 
             <div className="border-t"></div>
