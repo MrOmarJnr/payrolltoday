@@ -1,0 +1,17 @@
+# Secrets & env
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+npm-debug.log*
+dist/
+
+# Backend uploads (runtime files)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# OS / editor
+.DS_Store
+*.log

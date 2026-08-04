@@ -1,21 +1,43 @@
 const pool = require("../config/db");
 
 async function calculatePAYE(taxableIncome) {
-  const [bands] = await pool.query(`
+const [bands] = await pool.query(`
     SELECT *
     FROM tax_bands
-    ORDER BY limit_value ASC
-  `);
+    ORDER BY limit_value IS NULL, limit_value ASC
+`);
 
   let remaining = Number(taxableIncome);
   let previousLimit = 0;
   let paye = 0;
 
+  console.log("\n======================");
+  console.log("Taxable Income:", taxableIncome);
+  console.log("======================");
+
   for (const band of bands) {
     const currentLimit = band.limit_value;
 
+    console.log({
+      band: band.id,
+      limit: currentLimit,
+      rate: band.rate,
+      remainingBefore: remaining,
+      previousLimit,
+    });
+
     if (currentLimit === null) {
       paye += remaining * (Number(band.rate) / 100);
+
+      console.log(
+        "LAST BAND:",
+        remaining,
+        "*",
+        band.rate,
+        "=",
+        remaining * (Number(band.rate) / 100)
+      );
+
       break;
     }
 
@@ -23,9 +45,29 @@ async function calculatePAYE(taxableIncome) {
 
     if (remaining > taxableBand) {
       paye += taxableBand * (Number(band.rate) / 100);
+
+      console.log(
+        "FULL BAND:",
+        taxableBand,
+        "*",
+        band.rate,
+        "=",
+        taxableBand * (Number(band.rate) / 100)
+      );
+
       remaining -= taxableBand;
     } else {
       paye += remaining * (Number(band.rate) / 100);
+
+      console.log(
+        "PARTIAL BAND:",
+        remaining,
+        "*",
+        band.rate,
+        "=",
+        remaining * (Number(band.rate) / 100)
+      );
+
       remaining = 0;
       break;
     }
@@ -33,9 +75,11 @@ async function calculatePAYE(taxableIncome) {
     previousLimit = currentLimit;
   }
 
+  console.log("TOTAL PAYE:", paye);
+  console.log("======================\n");
+
   return Number(paye.toFixed(2));
 }
-
 async function calculatePayroll(employeeId, periodMonth) {
   const [[employee]] = await pool.query(
     `
@@ -100,16 +144,27 @@ async function calculatePayroll(employeeId, periodMonth) {
     riskAllowance +
     otherAllowances;
 
-  const employeeSsnit =
-  grossSalary *
+const employeeSsnit =
+  basicSalary *
   (Number(settings.employee_ssnit_rate || 5.5) / 100);
 
 const employerSsnit =
-  grossSalary *
+  basicSalary *
   (Number(settings.employer_ssnit_rate || 13) / 100);
 
   const taxableIncome =
     grossSalary - employeeSsnit;
+
+
+
+console.log({
+  grossSalary,
+  basicSalary,
+  employeeSsnit,
+  taxableIncome,
+});
+
+
 
   const paye = await calculatePAYE(
     taxableIncome

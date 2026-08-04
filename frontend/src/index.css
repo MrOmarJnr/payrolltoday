@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------
+   LEF ERP — Enterprise design system
+   Primary #0152D5 · Accent cyan #00C4F6 · Ink #091E42 · Muted #6B778C
+   Canvas #F4F5F7 · Manrope typeface
+   (Ported & extended from the korlebu reference design)
+----------------------------------------------------------------- */
+@theme {
+  --font-sans: "Manrope", "Inter", system-ui, -apple-system, sans-serif;
+
+  --color-brand-50:  #eaf1ff;
+  --color-brand-100: #d6e4ff;
+  --color-brand-200: #b3ccff;
+  --color-brand-500: #0152d5;
+  --color-brand-600: #0146b8;
+  --color-brand-700: #04328a;
+
+  --color-cyan-400: #00c4f6;
+  --color-cyan-100: #d4f4fd;
+
+  --color-ink:     #091e42;
+  --color-muted:   #6b778c;
+  --color-canvas:  #f4f5f7;
+  --color-line:    #e6e9ef;
+
+  --shadow-card: 0 1px 3px rgba(9, 30, 66, 0.06), 0 1px 2px rgba(9, 30, 66, 0.04);
+  --shadow-pop:  0 12px 30px rgba(9, 30, 66, 0.12);
+  --radius-xl2: 1.1rem;
+}
+
+html, body, #root { width: 100%; min-height: 100%; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Reusable component classes */
+@layer components {
+  .card {
+    background: #fff;
+    border-radius: var(--radius-xl2);
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--color-line);
+  }
+  .chip {
+    display: inline-flex; align-items: center; gap: .35rem;
+    padding: .15rem .55rem; border-radius: 9999px;
+    font-size: .7rem; font-weight: 700; line-height: 1.4;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .55rem .95rem; border-radius: .8rem;
+    background: var(--color-brand-500); color: #fff;
+    font-size: .82rem; font-weight: 700;
+    box-shadow: 0 6px 16px rgba(1,82,213,.25);
+    transition: background .15s; cursor: pointer;
+  }
+  .btn-primary:hover { background: var(--color-brand-600); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .55rem .95rem; border-radius: .8rem;
+    background: #fff; color: var(--color-ink);
+    font-size: .82rem; font-weight: 700;
+    border: 1px solid var(--color-line);
+    transition: background .15s; cursor: pointer;
+  }
+  .btn-ghost:hover { background: var(--color-canvas); }
+  .input {
+    width: 100%; padding: .55rem .75rem; border-radius: .7rem;
+    border: 1px solid var(--color-line); background: #fff;
+    font-size: .85rem; color: var(--color-ink); outline: none;
+  }
+  .input:focus { border-color: var(--color-brand-500); box-shadow: 0 0 0 3px var(--color-brand-50); }
+  .label { font-size: .72rem; font-weight: 700; color: var(--color-muted); text-transform: uppercase; letter-spacing: .04em; }
+  .th { text-align: left; font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--color-muted); padding: .7rem .9rem; }
+  .td { padding: .75rem .9rem; font-size: .82rem; color: var(--color-ink); border-top: 1px solid var(--color-line); }
+}
+
+/* Thin, modern scrollbars */
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: #d5dae3; border-radius: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+@keyframes popIn { from { opacity: 0; transform: translateY(8px) scale(.98) } to { opacity: 1; transform: translateY(0) scale(1) } }

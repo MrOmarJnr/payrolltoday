@@ -17,6 +17,38 @@ const settingsRoutes = require("./routes/settings.routes");
 const userRoutes = require("./routes/users.routes");
 const hikvisionRoutes = require("./routes/hikvision.routes");
 
+// ---- ERP: Finance ----
+const expenseCategoryRoutes = require("./routes/expenseCategories.routes");
+const expenseRoutes = require("./routes/expenses.routes");
+const fuelRoutes = require("./routes/fuel.routes");
+const vehicleRoutes = require("./routes/vehicles.routes");
+const budgetRoutes = require("./routes/budgets.routes");
+const pettyCashRoutes = require("./routes/pettyCash.routes");
+const uploadRoutes = require("./routes/uploads.routes");
+
+// ---- ERP: Inventory ----
+const invCategoryRoutes = require("./routes/invCategories.routes");
+const warehouseRoutes = require("./routes/warehouses.routes");
+const invItemRoutes = require("./routes/invItems.routes");
+const stockRoutes = require("./routes/stock.routes");
+const assetRoutes = require("./routes/assets.routes");
+
+// ---- ERP: Procurement ----
+const supplierRoutes = require("./routes/suppliers.routes");
+const purchaseRequestRoutes = require("./routes/purchaseRequests.routes");
+const purchaseOrderRoutes = require("./routes/purchaseOrders.routes");
+const rfqRoutes = require("./routes/rfqs.routes");
+const supplierQuotationRoutes = require("./routes/supplierQuotations.routes");
+const vendorBillRoutes = require("./routes/vendorBills.routes");
+
+// ---- ERP: Administration & Dashboards ----
+const auditLogRoutes = require("./routes/auditLogs.routes");
+const roleRoutes = require("./routes/roles.routes");
+const dashboardRoutes = require("./routes/dashboards.routes");
+
+// ---- Mobile (Aura) attendance sync ----
+const attendanceSyncRoutes = require("./routes/attendanceSync.routes");
+
 
 
 
@@ -36,6 +68,10 @@ app.use(
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Serve uploaded attachments (receipts, etc.)
+const path = require("path");
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 app.get("/api/health", async (req, res) => {
@@ -71,6 +107,36 @@ app.use("/api/reports", reportsRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/hikvision", hikvisionRoutes);
+
+// ---- ERP: Finance ----
+app.use("/api/expense-categories", expenseCategoryRoutes);
+app.use("/api/expenses", expenseRoutes);
+app.use("/api/fuel", fuelRoutes);
+app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/budgets", budgetRoutes);
+app.use("/api/petty-cash", pettyCashRoutes);
+app.use("/api/uploads", uploadRoutes);
+
+// ---- ERP: Inventory ----
+app.use("/api/inv-categories", invCategoryRoutes);
+app.use("/api/warehouses", warehouseRoutes);
+app.use("/api/inv-items", invItemRoutes);
+app.use("/api/stock-movements", stockRoutes);
+app.use("/api/assets", assetRoutes);
+
+// ---- ERP: Procurement ----
+app.use("/api/suppliers", supplierRoutes);
+app.use("/api/purchase-requests", purchaseRequestRoutes);
+app.use("/api/purchase-orders", purchaseOrderRoutes);
+app.use("/api/rfqs", rfqRoutes);
+app.use("/api/supplier-quotations", supplierQuotationRoutes);
+app.use("/api/vendor-bills", vendorBillRoutes);
+
+// ---- ERP: Administration & Dashboards ----
+app.use("/api/audit-logs", auditLogRoutes);
+app.use("/api/roles", roleRoutes);
+app.use("/api/dashboards", dashboardRoutes);
+app.use("/api/attendance-sync", attendanceSyncRoutes);
 
 
 const PORT = process.env.PORT || 5000;

@@ -1,7 +1,31 @@
 const pool = require("../config/db");
 
+/*
+|--------------------------------------------------------------------------
+| Helpers
+|--------------------------------------------------------------------------
+*/
+
+function calculateHours(clockIn, clockOut) {
+  if (!clockIn || !clockOut) return 0;
+
+  const start = new Date(`1970-01-01 ${clockIn}`);
+  const end = new Date(`1970-01-01 ${clockOut}`);
+
+  const hours = (end - start) / (1000 * 60 * 60);
+
+  return hours > 0 ? Number(hours.toFixed(2)) : 0;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Get Attendance
+|--------------------------------------------------------------------------
+*/
+
 const getAttendance = async (req, res) => {
   try {
+
     const [rows] = await pool.query(`
       SELECT
         attendance_logs.*,
@@ -12,35 +36,48 @@ const getAttendance = async (req, res) => {
       FROM attendance_logs
       LEFT JOIN employees
       ON attendance_logs.employee_id = employees.id
-      ORDER BY attendance_date DESC
+      ORDER BY attendance_date DESC, clock_in ASC
     `);
 
     res.json({
       success: true,
-      data: rows,
+      data: rows
     });
+
   } catch (error) {
+
     console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message
     });
+
   }
 };
 
+/*
+|--------------------------------------------------------------------------
+| Create Manual Attendance
+|--------------------------------------------------------------------------
+*/
+
 const createAttendance = async (req, res) => {
+
   try {
+
     const {
-      id,
       employee_id,
       attendance_date,
       clock_in,
       clock_out,
-      status,
-      hours_worked,
-      source,
+      status
     } = req.body;
+
+    const hoursWorked = calculateHours(
+      clock_in,
+      clock_out
+    );
 
     await pool.query(
       `
@@ -53,38 +90,60 @@ const createAttendance = async (req, res) => {
         clock_out,
         status,
         hours_worked,
-        source
+        source,
+        is_manual
       )
-      VALUES (?,?,?,?,?,?,?,?)
+      VALUES
+      (
+        UUID(),
+        ?, ?, ?, ?, ?, ?, 'Manual', 1
+      )
+      ON DUPLICATE KEY UPDATE
+        clock_in = VALUES(clock_in),
+        clock_out = VALUES(clock_out),
+        status = VALUES(status),
+        hours_worked = VALUES(hours_worked),
+        source = 'Manual',
+        is_manual = 1
       `,
       [
-        id,
         employee_id,
         attendance_date,
         clock_in,
         clock_out,
         status,
-        hours_worked,
-        source,
+        hoursWorked
       ]
     );
 
     res.json({
       success: true,
-      message: "Attendance created successfully",
+      message: "Attendance saved successfully."
     });
+
   } catch (error) {
+
     console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message
     });
+
   }
+
 };
 
+/*
+|--------------------------------------------------------------------------
+| Update Attendance
+|--------------------------------------------------------------------------
+*/
+
 const updateAttendance = async (req, res) => {
+
   try {
+
     const { id } = req.params;
 
     const {
@@ -92,22 +151,26 @@ const updateAttendance = async (req, res) => {
       attendance_date,
       clock_in,
       clock_out,
-      status,
-      hours_worked,
-      source,
+      status
     } = req.body;
+
+    const hoursWorked = calculateHours(
+      clock_in,
+      clock_out
+    );
 
     await pool.query(
       `
       UPDATE attendance_logs
       SET
-      employee_id=?,
-      attendance_date=?,
-      clock_in=?,
-      clock_out=?,
-      status=?,
-      hours_worked=?,
-      source=?
+        employee_id=?,
+        attendance_date=?,
+        clock_in=?,
+        clock_out=?,
+        status=?,
+        hours_worked=?,
+        source='Manual',
+        is_manual=1
       WHERE id=?
       `,
       [
@@ -116,28 +179,39 @@ const updateAttendance = async (req, res) => {
         clock_in,
         clock_out,
         status,
-        hours_worked,
-        source,
-        id,
+        hoursWorked,
+        id
       ]
     );
 
     res.json({
       success: true,
-      message: "Attendance updated successfully",
+      message: "Attendance updated successfully."
     });
+
   } catch (error) {
+
     console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message
     });
+
   }
+
 };
 
+/*
+|--------------------------------------------------------------------------
+| Delete Attendance
+|--------------------------------------------------------------------------
+*/
+
 const deleteAttendance = async (req, res) => {
+
   try {
+
     await pool.query(
       "DELETE FROM attendance_logs WHERE id=?",
       [req.params.id]
@@ -145,21 +219,25 @@ const deleteAttendance = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Attendance deleted successfully",
+      message: "Attendance deleted successfully."
     });
+
   } catch (error) {
+
     console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message
     });
+
   }
+
 };
 
 module.exports = {
   getAttendance,
   createAttendance,
   updateAttendance,
-  deleteAttendance,
+  deleteAttendance
 };
