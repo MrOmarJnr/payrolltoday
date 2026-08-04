@@ -1,5 +1,14 @@
 require("dotenv").config();
-require("./cron/attendance.cron");
+
+// Hikvision polling cron. Disabled by default in the cloud (the device is on a
+// private LAN the cloud can't reach). Set ENABLE_HIKVISION_CRON=true only when
+// the backend runs somewhere that CAN reach the device (e.g. on-prem).
+// When off, the on-prem hikvision-agent pushes events via /api/attendance-sync.
+if (process.env.ENABLE_HIKVISION_CRON === "true") {
+  require("./cron/attendance.cron");
+} else {
+  console.log("Hikvision cron disabled (ENABLE_HIKVISION_CRON!=true). Using push agent.");
+}
 
 const express = require("express");
 const cors = require("cors");

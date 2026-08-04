@@ -14,8 +14,19 @@
 const express = require("express");
 const crypto = require("crypto");
 const pool = require("../config/db");
+const hik = require("../services/hikvision.service");
 
 const router = express.Router();
+
+// Format a Hikvision event time ("...T08:14:22+00:00") to MySQL DATETIME,
+// matching how hikvision.service stores it.
+function toMysqlDateTime(value) {
+  if (!value) return null;
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return null;
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
 
 // Shared-secret guard
 router.use((req, res, next) => {
@@ -101,6 +112,54 @@ router.post("/clock", async (req, res) => {
     return res.json({ success: true, message: "Clock-out synced.", employee_id: empId, date, time });
   } catch (e) {
     console.error("[attendance-sync]", e);
+    return res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+/*
+| Hikvision ingest — the on-prem agent POSTs the raw AcsEvent InfoList here.
+| We stage them in hikvision_raw_logs (same shape as the device pull) then run
+| the EXISTING processRawLogs() + processAttendance() so cloud behaviour is
+| identical to the old on-prem cron. Idempotent: serial_no is unique.
+*/
+router.post("/hikvision", async (req, res) => {
+  try {
+    const events = Array.isArray(req.body?.events) ? req.body.events : [];
+    if (!events.length) return res.json({ success: true, message: "No events.", inserted: 0 });
+
+    let inserted = 0, skipped = 0;
+    for (const event of events) {
+      const employeeNo = String(event.employeeNoString || "").trim();
+      if (!employeeNo || employeeNo === "0001") { skipped++; continue; }
+      const eventTime = toMysqlDateTime(event.time);
+      if (!eventTime) { skipped++; continue; }
+
+      // Only stage events for known employees (device employee no == LEF employee id)
+      const [[emp]] = await pool.query("SELECT id FROM employees WHERE id = ? LIMIT 1", [employeeNo]);
+      if (!emp) { skipped++; continue; }
+
+      const [r] = await pool.query(
+        `INSERT IGNORE INTO hikvision_raw_logs
+           (serial_no, employee_id, employee_name, event_type, event_time, source, raw_json)
+         VALUES (?,?,?,?,?,?,?)`,
+        [Number(event.serialNo || 0), employeeNo, String(event.name || "").trim(),
+         String(event.currentVerifyMode || ""), eventTime, "hikvision", JSON.stringify(event)]
+      );
+      if (r.affectedRows) inserted++; else skipped++;
+    }
+
+    // Run the same pipeline the cron used
+    const raw = await hik.processRawLogs();
+    const att = await hik.processAttendance();
+
+    return res.json({
+      success: true,
+      message: "Hikvision events ingested.",
+      received: events.length, inserted, skipped,
+      processed: { biometricImported: raw.imported, attendanceUpdated: raw.attendanceUpdated, attendanceProcessed: att.processed },
+    });
+  } catch (e) {
+    console.error("[attendance-sync/hikvision]", e);
     return res.status(500).json({ success: false, message: e.message });
   }
 });
