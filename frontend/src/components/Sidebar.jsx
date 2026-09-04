@@ -15,10 +15,9 @@ export default function Sidebar({ authUser, activeTab, setActiveTab, sidebarColl
       {/* Brand */}
       <div className={`h-[68px] flex items-center border-b border-line ${c ? "justify-center" : "px-5 justify-between"}`}>
         <div className="flex items-center gap-2.5">
-          <span className="grid place-items-center w-9 h-9 rounded-xl bg-brand-500 text-white font-extrabold">L</span>
           {!c && (
             <div className="leading-tight">
-              <p className="text-[13px] font-extrabold text-ink">LEF Enterprise</p>
+              <p className="text-[13px] font-extrabold text-ink">LEF Signature</p>
               <p className="text-[10px] text-muted font-semibold">ERP Platform</p>
             </div>
           )}
@@ -57,9 +56,9 @@ export default function Sidebar({ authUser, activeTab, setActiveTab, sidebarColl
                         key={it.id}
                         onClick={() => setActiveTab(it.id)}
                         title={it.label}
-                        className={`w-full flex items-center ${c ? "justify-center" : "gap-3"} px-3 py-2 rounded-xl text-[13px] font-semibold transition-all
+                        className={`w-full flex items-center ${c ? "justify-center" : "gap-3"} px-3 py-2 rounded-lg text-[13px] font-semibold transition-colors duration-150 active:scale-[0.98]
                           ${active
-                            ? "bg-brand-500 text-white shadow-[0_6px_16px_rgba(1,82,213,0.30)]"
+                            ? "bg-brand-500 text-white"
                             : "text-muted hover:bg-canvas hover:text-ink"}`}
                       >
                         <Icon size={18} className="shrink-0" />

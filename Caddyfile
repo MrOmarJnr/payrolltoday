@@ -1,0 +1,21 @@
+# LEF ERP — Caddy reverse proxy.
+# Automatic HTTPS: Caddy requests/renews a Let's Encrypt cert for {$DOMAIN}
+# as soon as it can reach it on 80/443, no manual certbot steps needed.
+#
+# Set DOMAIN in .env to your real domain before going live, e.g.:
+#   DOMAIN=payroll.lefsignature.com
+# For local testing without a domain, leave DOMAIN unset (defaults to
+# "localhost") — Caddy serves a local, self-signed cert on https://localhost.
+
+{$DOMAIN:localhost} {
+	encode gzip
+
+	# Security headers on top of what the backend (helmet) already sets.
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+
+	reverse_proxy frontend:80
+}

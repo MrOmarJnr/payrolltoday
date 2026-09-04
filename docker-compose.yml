@@ -1,10 +1,19 @@
 # ============================================================================
-#  LEF ERP — full stack: database + backend API + frontend + phpMyAdmin
+#  LEF ERP — full stack: database + backend API + frontend + Caddy (TLS) +
+#  phpMyAdmin (optional, off by default)
 # ----------------------------------------------------------------------------
-#  All secrets live in .env (never in this file or the Dockerfiles).
-#  Local dev:   docker compose up -d --build
-#  Push:        docker compose build && docker compose push
-#  On server:   docker compose pull && docker compose up -d
+#  SECURITY: Caddy is the ONLY public port (80/443). Everything else is
+#  internal to the compose network or bound to 127.0.0.1:
+#    - db is bound to 127.0.0.1 (reach it via an SSH tunnel, never publicly).
+#    - backend has no host port at all; Caddy -> frontend nginx -> backend.
+#    - phpMyAdmin only starts with `--profile admin-tools` and is bound to
+#      127.0.0.1 even then — it should never run unattended on a public box.
+#  External clients (mobile app, Hikvision agent) call the WEB URL over HTTPS,
+#  e.g. https://YOUR_DOMAIN/api/attendance-sync/... (proxied to the backend).
+#
+#  All secrets live in .env (never in this file or the images). Use STRONG,
+#  unique values — never "admin". Rotate every secret when moving to a new
+#  server; don't carry over values from a previous/compromised deployment.
 # ============================================================================
 
 services:
@@ -19,16 +28,43 @@ services:
       MARIADB_PASSWORD: ${DB_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
-      # SQL files here run automatically the FIRST time the DB is created,
-      # in alphabetical order (01_ = existing HR schema+data, 02_ = ERP tables).
       - ./db/init:/docker-entrypoint-initdb.d:ro
+    # Bound to localhost only. NOT reachable from the internet.
+    # To use a DB tool from your laptop:  ssh -L 3306:127.0.0.1:3306 user@server
     ports:
-      - "${DB_PORT:-3306}:3306"
+      - "127.0.0.1:${DB_PORT:-3306}:3306"
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
       timeout: 5s
       retries: 10
+
+  # Nightly DB dump to a local, git-ignored volume. Copy dumps off-box
+  # regularly (rsync/S3/etc.) — a local-only backup doesn't survive the
+  # server itself being compromised or lost.
+  db-backup:
+    image: mariadb:10.11
+    container_name: lef-db-backup
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./db/backups:/backups
+    entrypoint: >
+      sh -c "
+        echo 'DB backup service started — dumping every 24h, keeping 14 days.';
+        while true; do
+          FILE=/backups/lef_payroll_$$(date +%Y%m%d_%H%M%S).sql.gz;
+          mysqldump -h db -u $$DB_USER -p$$DB_PASSWORD $$DB_NAME | gzip > $$FILE && echo \"Backed up to $$FILE\";
+          find /backups -name '*.sql.gz' -mtime +14 -delete;
+          sleep 86400;
+        done
+      "
 
   backend:
     build: ./backend
@@ -46,42 +82,78 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       SYNC_API_KEY: ${SYNC_API_KEY:-}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
+      FRONTEND_URL: ${FRONTEND_URL}
     volumes:
       - uploads_data:/app/uploads
     depends_on:
       db:
         condition: service_healthy
-    ports:
-      - "${BACKEND_PORT:-5000}:5000"
+    # No host port. The frontend nginx reaches it internally as http://backend:5000.
+    expose:
+      - "5000"
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
 
   frontend:
     build:
       context: ./frontend
       args:
-        # Same-origin: nginx (this container) proxies /api to the backend
         VITE_API_URL: ${VITE_API_URL:-/api}
     image: ${DOCKERHUB_USER:-lef}/lef-frontend:${TAG:-latest}
     container_name: lef-frontend
     restart: unless-stopped
     depends_on:
       - backend
-    ports:
-      - "${FRONTEND_PORT:-8080}:80"
+    # No host port — only Caddy (below) is public. Internal-only on the
+    # compose network as http://frontend:80.
+    expose:
+      - "80"
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
 
+  # Terminates HTTPS for the real domain (automatic Let's Encrypt cert +
+  # renewal) and reverse-proxies everything to the frontend's nginx. This is
+  # the ONLY service with a public port.
+  caddy:
+    image: caddy:2-alpine
+    container_name: lef-caddy
+    restart: unless-stopped
+    depends_on:
+      - frontend
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    ports:
+      - "80:80"
+      - "443:443"
+
+  # Optional DB admin UI. NOT started by default — run explicitly with:
+  #   docker compose --profile admin-tools up -d phpmyadmin
+  # and always reach it through an SSH tunnel, never by opening the port to
+  # the internet. Stop it again (`docker compose stop phpmyadmin`) when done.
   phpmyadmin:
     image: phpmyadmin:5.2
     container_name: lef-phpmyadmin
     restart: unless-stopped
+    profiles: ["admin-tools"]
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
       UPLOAD_LIMIT: 300M
     depends_on:
       - db
+    # Bound to localhost only. Reach it via an SSH tunnel, never the public net:
+    #   ssh -L 8081:127.0.0.1:8081 user@server   then open http://localhost:8081
     ports:
-      - "${PMA_PORT:-8081}:80"
+      - "127.0.0.1:${PMA_PORT:-8081}:80"
 
 volumes:
   db_data:
   uploads_data:
+  caddy_data:
+  caddy_config:

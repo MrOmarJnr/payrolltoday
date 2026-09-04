@@ -24,10 +24,10 @@ import Expenses from "../pages/finance/Expenses";
 import ExpenseCategories from "../pages/finance/ExpenseCategories";
 import FuelManagement from "../pages/finance/FuelManagement";
 import Vehicles from "../pages/finance/Vehicles";
-import Budgets from "../pages/finance/Budgets";
 import PettyCash from "../pages/finance/PettyCash";
 import FinancialReports from "../pages/finance/FinancialReports";
 import FinanceAnalytics from "../pages/finance/FinanceAnalytics";
+import Suppliers from "../pages/finance/Suppliers";
 
 // Inventory
 import InventoryDashboard from "../pages/inventory/InventoryDashboard";
@@ -39,16 +39,6 @@ import StockOut from "../pages/inventory/StockOut";
 import StockAdjustments from "../pages/inventory/StockAdjustments";
 import Assets from "../pages/inventory/Assets";
 import InventoryReports from "../pages/inventory/InventoryReports";
-
-// Procurement
-import ProcurementDashboard from "../pages/procurement/ProcurementDashboard";
-import PurchaseRequests from "../pages/procurement/PurchaseRequests";
-import PurchaseOrders from "../pages/procurement/PurchaseOrders";
-import RFQs from "../pages/procurement/RFQs";
-import SupplierQuotations from "../pages/procurement/SupplierQuotations";
-import VendorBills from "../pages/procurement/VendorBills";
-import Suppliers from "../pages/procurement/Suppliers";
-import ProcurementReports from "../pages/procurement/ProcurementReports";
 
 // Administration
 import Users from "../pages/admin/Users";
@@ -73,7 +63,6 @@ const PAGES = {
   vendors: Suppliers,
   fuel: FuelManagement,
   vehicles: Vehicles,
-  budgets: Budgets,
   "petty-cash": PettyCash,
   "fin-reports": FinancialReports,
   "fin-analytics": FinanceAnalytics,
@@ -86,14 +75,6 @@ const PAGES = {
   adjustments: StockAdjustments,
   assets: Assets,
   "inv-reports": InventoryReports,
-  "proc-dashboard": ProcurementDashboard,
-  "purchase-requests": PurchaseRequests,
-  "purchase-orders": PurchaseOrders,
-  rfqs: RFQs,
-  "supplier-quotations": SupplierQuotations,
-  "vendor-bills": VendorBills,
-  suppliers: Suppliers,
-  "proc-reports": ProcurementReports,
   users: Users,
   roles: Roles,
   "audit-logs": AuditLogs,

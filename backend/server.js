@@ -19,6 +19,7 @@ const authRoutes = require("./routes/auth.routes");
 const departmentRoutes = require("./routes/department.routes");
 const employeeRoutes = require("./routes/employee.routes");
 const attendanceRoutes = require("./routes/attendance.routes");
+const leaveRoutes = require("./routes/leave.routes");
 const payrollRoutes = require("./routes/payroll.routes");
 const payslipRoutes = require("./routes/payslip.routes");
 const reportsRoutes = require("./routes/reports.routes");
@@ -31,7 +32,6 @@ const expenseCategoryRoutes = require("./routes/expenseCategories.routes");
 const expenseRoutes = require("./routes/expenses.routes");
 const fuelRoutes = require("./routes/fuel.routes");
 const vehicleRoutes = require("./routes/vehicles.routes");
-const budgetRoutes = require("./routes/budgets.routes");
 const pettyCashRoutes = require("./routes/pettyCash.routes");
 const uploadRoutes = require("./routes/uploads.routes");
 
@@ -42,13 +42,8 @@ const invItemRoutes = require("./routes/invItems.routes");
 const stockRoutes = require("./routes/stock.routes");
 const assetRoutes = require("./routes/assets.routes");
 
-// ---- ERP: Procurement ----
+// ---- Suppliers (shared by Finance & Inventory; Procurement module retired) ----
 const supplierRoutes = require("./routes/suppliers.routes");
-const purchaseRequestRoutes = require("./routes/purchaseRequests.routes");
-const purchaseOrderRoutes = require("./routes/purchaseOrders.routes");
-const rfqRoutes = require("./routes/rfqs.routes");
-const supplierQuotationRoutes = require("./routes/supplierQuotations.routes");
-const vendorBillRoutes = require("./routes/vendorBills.routes");
 
 // ---- ERP: Administration & Dashboards ----
 const auditLogRoutes = require("./routes/auditLogs.routes");
@@ -74,8 +69,10 @@ app.use(
   })
 );
 
-app.use(express.json({ limit: "10kb" }));
-app.use(express.urlencoded({ extended: true }));
+// 10kb is fine for normal API calls, but the Hikvision agent posts batches of
+// device events, so allow a larger JSON body.
+app.use(express.json({ limit: "5mb" }));
+app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 app.use(cookieParser());
 
 // Serve uploaded attachments (receipts, etc.)
@@ -110,6 +107,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/departments", departmentRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/attendance", attendanceRoutes);
+app.use("/api/leave", leaveRoutes);
 app.use("/api/payroll", payrollRoutes);
 app.use("/api/payslips", payslipRoutes);
 app.use("/api/reports", reportsRoutes);
@@ -122,7 +120,6 @@ app.use("/api/expense-categories", expenseCategoryRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/fuel", fuelRoutes);
 app.use("/api/vehicles", vehicleRoutes);
-app.use("/api/budgets", budgetRoutes);
 app.use("/api/petty-cash", pettyCashRoutes);
 app.use("/api/uploads", uploadRoutes);
 
@@ -133,13 +130,8 @@ app.use("/api/inv-items", invItemRoutes);
 app.use("/api/stock-movements", stockRoutes);
 app.use("/api/assets", assetRoutes);
 
-// ---- ERP: Procurement ----
+// ---- Suppliers ----
 app.use("/api/suppliers", supplierRoutes);
-app.use("/api/purchase-requests", purchaseRequestRoutes);
-app.use("/api/purchase-orders", purchaseOrderRoutes);
-app.use("/api/rfqs", rfqRoutes);
-app.use("/api/supplier-quotations", supplierQuotationRoutes);
-app.use("/api/vendor-bills", vendorBillRoutes);
 
 // ---- ERP: Administration & Dashboards ----
 app.use("/api/audit-logs", auditLogRoutes);

@@ -443,10 +443,10 @@ Updated: ${response.data.updated}`
           <Search className="absolute left-3 top-2.5 text-slate-400" size={14} />
           <input
             type="text"
-            placeholder="Search by ID, name or position..."
+            aria-label="Search by ID, name or position"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-4 py-2 w-full border border-slate-200 rounded text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none focus:border-blue-500"
+            className="pl-9 pr-4 py-2 w-full border border-slate-200 rounded text-xs outline-none"
           />
         </div>
 
@@ -766,7 +766,7 @@ Updated: ${response.data.updated}`
                     <select
                       value={photoUrl}
                       onChange={(e) => setPhotoUrl(e.target.value)}
-                      className="p-1 w-full border-none bg-transparent text-[10px] focus:ring-0"
+                      className="p-1 w-full border-none bg-transparent text-[10px] outline-none"
                     >
                       {profilePics.map((p, idx) => (
                         <option key={p} value={p}>
@@ -783,7 +783,7 @@ Updated: ${response.data.updated}`
                     required
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    className="px-3 py-1.5 w-full border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500"
+                    className="px-3 py-1.5 w-full border border-slate-200 rounded-lg text-xs outline-none"
                   />
                 </div>
               </div>
@@ -888,7 +888,7 @@ function TextInput({ label, value, setValue, type = "text", required = false }) 
         required={required}
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className="px-3 py-1.5 w-full border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500"
+        className="px-3 py-1.5 w-full border border-slate-200 rounded-lg text-xs outline-none"
       />
     </div>
   );
@@ -903,7 +903,7 @@ function DateInput({ label, value, setValue }) {
         required
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className="px-3 py-1.5 w-full border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500"
+        className="px-3 py-1.5 w-full border border-slate-200 rounded-lg text-xs outline-none"
       />
     </div>
   );

@@ -1,6 +1,6 @@
 import {
-  Users, Clock, Wallet, PiggyBank, Boxes, Laptop, AlertTriangle,
-  ClipboardList, ShoppingCart, CheckSquare, Fuel, TrendingUp,
+  Users, Clock, Wallet, Boxes, Laptop, AlertTriangle,
+  CheckSquare, Fuel, TrendingUp,
 } from "lucide-react";
 import { useData } from "../hooks/useApi";
 import { money, num, date } from "../utils/format";
@@ -12,14 +12,13 @@ export default function Dashboard() {
 
   return (
     <div>
-      <PageHeader title="Executive Dashboard" subtitle="Company-wide view across HR, Finance, Inventory and Procurement" />
+      <PageHeader title="Executive Dashboard" />
 
       {/* Row 1 — headline KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      <div className="grid grid-cols-3 gap-4 mb-4">
         <Kpi label="Total Employees" value={num(k.totalEmployees)} icon={Users} tone="brand" />
         <Kpi label="Attendance Today" value={num(k.attendanceToday)} icon={Clock} tone="cyan" />
         <Kpi label="Monthly Expenses" value={money(k.monthlyExpenses)} icon={Wallet} tone="violet" />
-        <Kpi label="Budget Remaining" value={money(k.budgetRemaining)} icon={PiggyBank} tone="green" />
       </div>
 
       {/* Row 2 — operations KPIs */}
@@ -31,9 +30,7 @@ export default function Dashboard() {
       </div>
 
       {/* Row 3 — pending work */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Kpi label="Pending Purchase Requests" value={num(k.pendingPRs)} icon={ClipboardList} tone="amber" />
-        <Kpi label="Pending Purchase Orders" value={num(k.pendingPOs)} icon={ShoppingCart} tone="brand" />
+      <div className="grid grid-cols-2 gap-4 mb-6">
         <Kpi label="Pending Approvals" value={num(k.pendingApprovals)} icon={CheckSquare} tone="red" />
         <Kpi label="YTD Expenses" value={money(k.totalExpensesYear)} icon={TrendingUp} tone="green" />
       </div>

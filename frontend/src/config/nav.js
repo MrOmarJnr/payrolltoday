@@ -12,9 +12,9 @@
 */
 import {
   LayoutDashboard, BarChart3, Users, Building2, Clock, CalendarClock,
-  DollarSign, FileText, Fuel, Wallet, PiggyBank, LineChart, ReceiptText, Tag, Car, Truck,
+  DollarSign, FileText, Fuel, Wallet, LineChart, ReceiptText, Tag, Car, Truck,
   Boxes, Warehouse, PackagePlus, PackageMinus, SlidersHorizontal, Laptop,
-  ClipboardList, ShoppingCart, Send, FileSpreadsheet,
+  FileSpreadsheet,
   Settings, ShieldCheck, ScrollText,
 } from "lucide-react";
 
@@ -48,7 +48,6 @@ export const NAV_GROUPS = [
       { id: "vendors", label: "Vendors", icon: Truck },
       { id: "fuel", label: "Fuel Management", icon: Fuel },
       { id: "vehicles", label: "Vehicles", icon: Car },
-      { id: "budgets", label: "Budgets", icon: PiggyBank },
       { id: "petty-cash", label: "Petty Cash", icon: Wallet },
       { id: "fin-reports", label: "Financial Reports", icon: FileSpreadsheet },
       { id: "fin-analytics", label: "Analytics", icon: LineChart },
@@ -69,19 +68,6 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    title: "Procurement",
-    items: [
-      { id: "proc-dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { id: "purchase-requests", label: "Purchase Requests", icon: ClipboardList },
-      { id: "purchase-orders", label: "Purchase Orders", icon: ShoppingCart },
-      { id: "rfqs", label: "RFQs", icon: Send },
-      { id: "supplier-quotations", label: "Supplier Quotations", icon: FileSpreadsheet },
-      { id: "vendor-bills", label: "Vendor Bills", icon: ReceiptText },
-      { id: "suppliers", label: "Suppliers", icon: Truck },
-      { id: "proc-reports", label: "Procurement Reports", icon: BarChart3 },
-    ],
-  },
-  {
     title: "Administration",
     items: [
       { id: "users", label: "Users", icon: Users },
@@ -94,9 +80,8 @@ export const NAV_GROUPS = [
 
 export const ALL_TABS = [...new Set(NAV_GROUPS.flatMap((g) => g.items.map((i) => i.id)))];
 
-const FINANCE = ["fin-dashboard", "expenses", "expense-categories", "vendors", "fuel", "vehicles", "budgets", "petty-cash", "fin-reports", "fin-analytics"];
+const FINANCE = ["fin-dashboard", "expenses", "expense-categories", "vendors", "fuel", "vehicles", "petty-cash", "fin-reports", "fin-analytics"];
 const INVENTORY = ["inv-dashboard", "inv-items", "inv-categories", "warehouses", "stock-in", "stock-out", "adjustments", "assets", "inv-reports"];
-const PROCUREMENT = ["proc-dashboard", "purchase-requests", "purchase-orders", "rfqs", "supplier-quotations", "vendor-bills", "suppliers", "proc-reports"];
 
 export const PERMISSIONS = {
   Administrator: ALL_TABS,
@@ -106,11 +91,11 @@ export const PERMISSIONS = {
   ],
   "Payroll Officer": ["dashboard", "attendance", "payroll", "payslips", "reports"],
   "Finance Officer": [
-    "dashboard", "exec-dashboard", ...FINANCE,
-    "vendor-bills", "purchase-orders", "proc-reports", "suppliers", "assets", "inv-reports",
+    "dashboard", "exec-dashboard", ...FINANCE, "assets", "inv-reports",
   ],
-  "Procurement Officer": ["dashboard", ...PROCUREMENT, "inv-items", "inv-dashboard"],
-  "Read Only": ["dashboard", "exec-dashboard", "reports", "payslips", "fin-reports", "inv-reports", "proc-reports"],
+  // Procurement was retired; this role now covers Inventory (closest overlap — stock receiving/handling).
+  "Procurement Officer": ["dashboard", ...INVENTORY],
+  "Read Only": ["dashboard", "exec-dashboard", "reports", "payslips", "fin-reports", "inv-reports"],
 };
 
 export function canAccess(role, tab) {

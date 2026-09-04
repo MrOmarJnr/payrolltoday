@@ -12,6 +12,9 @@ dist/
 backend/uploads/*
 !backend/uploads/.gitkeep
 
+# Local nightly DB backups (runtime files — never commit dumps)
+db/backups/
+
 # OS / editor
 .DS_Store
 *.log

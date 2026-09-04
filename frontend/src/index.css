@@ -19,14 +19,20 @@
   --color-cyan-400: #00c4f6;
   --color-cyan-100: #d4f4fd;
 
-  --color-ink:     #091e42;
-  --color-muted:   #6b778c;
-  --color-canvas:  #f4f5f7;
-  --color-line:    #e6e9ef;
+  --color-ink:     #10151f;
+  --color-muted:   #64748b;
+  --color-canvas:  #f6f7f9;
+  --color-line:    #e6e8ec;
 
-  --shadow-card: 0 1px 3px rgba(9, 30, 66, 0.06), 0 1px 2px rgba(9, 30, 66, 0.04);
-  --shadow-pop:  0 12px 30px rgba(9, 30, 66, 0.12);
-  --radius-xl2: 1.1rem;
+  /* Quieter, more precise depth than a soft/glowy card shadow. */
+  --shadow-card: 0 1px 2px rgba(16, 21, 31, 0.04), 0 1px 1px rgba(16, 21, 31, 0.03);
+  --shadow-pop:  0 10px 26px rgba(16, 21, 31, 0.10), 0 2px 6px rgba(16, 21, 31, 0.05);
+  --radius-xl2: 0.85rem;
+
+  /* Restrained, consistent motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 150ms;
+  --dur-base: 220ms;
 }
 
 html, body, #root { width: 100%; min-height: 100%; margin: 0; padding: 0; }
@@ -37,6 +43,18 @@ body {
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
 }
+
+/* Consistent, visible focus ring everywhere — keyboard nav stays legible
+   even though most interactive elements below suppress the UA default. */
+:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* Text boxes intentionally show no focus ring/highlight on click or focus
+   (unlayered so it beats @layer components' .input rules regardless of
+   Tailwind's cascade-layer ordering). */
+.input:focus, .input:focus-visible { outline: none; box-shadow: none; }
 
 /* Reusable component classes */
 @layer components {
@@ -53,28 +71,32 @@ body {
   }
   .btn-primary {
     display: inline-flex; align-items: center; gap: .5rem;
-    padding: .55rem .95rem; border-radius: .8rem;
+    padding: .55rem .95rem; border-radius: .65rem;
     background: var(--color-brand-500); color: #fff;
     font-size: .82rem; font-weight: 700;
-    box-shadow: 0 6px 16px rgba(1,82,213,.25);
-    transition: background .15s; cursor: pointer;
+    box-shadow: 0 1px 2px rgba(16, 21, 31, 0.08);
+    transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+    cursor: pointer;
   }
   .btn-primary:hover { background: var(--color-brand-600); }
+  .btn-primary:active { transform: scale(0.98); }
   .btn-ghost {
     display: inline-flex; align-items: center; gap: .5rem;
-    padding: .55rem .95rem; border-radius: .8rem;
+    padding: .55rem .95rem; border-radius: .65rem;
     background: #fff; color: var(--color-ink);
     font-size: .82rem; font-weight: 700;
     border: 1px solid var(--color-line);
-    transition: background .15s; cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+    cursor: pointer;
   }
   .btn-ghost:hover { background: var(--color-canvas); }
+  .btn-ghost:active { transform: scale(0.98); }
   .input {
-    width: 100%; padding: .55rem .75rem; border-radius: .7rem;
+    width: 100%; padding: .55rem .75rem; border-radius: .6rem;
     border: 1px solid var(--color-line); background: #fff;
     font-size: .85rem; color: var(--color-ink); outline: none;
+    transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
   }
-  .input:focus { border-color: var(--color-brand-500); box-shadow: 0 0 0 3px var(--color-brand-50); }
   .label { font-size: .72rem; font-weight: 700; color: var(--color-muted); text-transform: uppercase; letter-spacing: .04em; }
   .th { text-align: left; font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--color-muted); padding: .7rem .9rem; }
   .td { padding: .75rem .9rem; font-size: .82rem; color: var(--color-ink); border-top: 1px solid var(--color-line); }
@@ -90,4 +112,20 @@ body {
   to   { opacity: 1; transform: translateX(0); }
 }
 @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-@keyframes popIn { from { opacity: 0; transform: translateY(8px) scale(.98) } to { opacity: 1; transform: translateY(0) scale(1) } }
+@keyframes popIn {
+  from { opacity: 0; transform: translateY(6px) scale(.98) }
+  to   { opacity: 1; transform: translateY(0) scale(1) }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px) }
+  to   { opacity: 1; transform: translateY(0) }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

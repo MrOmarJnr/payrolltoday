@@ -7,7 +7,6 @@ const TABS = [
   { id: "category", label: "By Category", key: "categoryBreakdown" },
   { id: "department", label: "By Department", key: "departmentSpending" },
   { id: "vendor", label: "By Vendor", key: "topVendors" },
-  { id: "budget", label: "Budget vs Actual", key: "budgetVsActual" },
 ];
 
 export default function FinancialReports() {
@@ -18,7 +17,7 @@ export default function FinancialReports() {
 
   return (
     <div>
-      <PageHeader title="Financial Reports" subtitle="Spending breakdowns by category, department, vendor and budget" />
+      <PageHeader title="Financial Reports" />
 
       <div className="flex flex-wrap gap-2 mb-4">
         {TABS.map((t) => (
@@ -31,30 +30,17 @@ export default function FinancialReports() {
 
       <Toolbar onExport={() => exportCsv(`finance_report_${tab}`, rows)} />
 
-      {tab === "budget" ? (
-        <Section title="Budget vs Actual">
+      <div className="grid lg:grid-cols-2 gap-4">
+        <Section title={active.label}>
           <DataTable rows={rows}
             columns={[
-              { key: "label", label: "Budget" },
-              { key: "allocated", label: "Allocated", align: "right", render: (r) => money(r.allocated) },
-              { key: "spent", label: "Spent", align: "right", render: (r) => money(r.spent) },
-              { key: "var", label: "Variance", align: "right", render: (r) => <span className={r.allocated - r.spent < 0 ? "text-red-600 font-bold" : "font-bold"}>{money(r.allocated - r.spent)}</span> },
+              { key: "label", label: active.label.replace("By ", "") },
+              { key: "value", label: "Amount", align: "right", render: (r) => <span className="font-bold">{money(r.value)}</span> },
             ]}
           />
         </Section>
-      ) : (
-        <div className="grid lg:grid-cols-2 gap-4">
-          <Section title={active.label}>
-            <DataTable rows={rows}
-              columns={[
-                { key: "label", label: active.label.replace("By ", "") },
-                { key: "value", label: "Amount", align: "right", render: (r) => <span className="font-bold">{money(r.value)}</span> },
-              ]}
-            />
-          </Section>
-          <Section title="Visual"><BarList data={rows} /></Section>
-        </div>
-      )}
+        <Section title="Visual"><BarList data={rows} /></Section>
+      </div>
     </div>
   );
 }

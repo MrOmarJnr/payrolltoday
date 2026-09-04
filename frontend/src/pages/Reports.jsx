@@ -354,7 +354,7 @@ const triggerCSVDownload = (headers, rows, filename) => {
               <select
                 value={targetMonth}
                 onChange={(e) => setTargetMonth(e.target.value)}
-                className="px-3 py-1.5 border border-slate-200 bg-white text-slate-700 text-xs rounded-lg font-bold focus:ring-1"
+                className="px-3 py-1.5 border border-slate-200 bg-white text-slate-700 text-xs rounded-lg font-bold outline-none"
               >
                 {payrollRuns.map((run) => (
                   <option key={run.id} value={run.periodMonth}>

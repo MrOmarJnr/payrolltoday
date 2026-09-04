@@ -47,7 +47,7 @@ export function Field({ label, children }) {
 }
 
 export const input =
-  "w-full bg-white border border-line rounded-xl px-3.5 py-2.5 text-sm text-ink placeholder:text-muted/60 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition";
+  "w-full bg-white border border-line rounded-xl px-3.5 py-2.5 text-sm text-ink outline-none transition";
 
 export function Badge({ text, tone = "slate" }) {
   const tones = {
@@ -184,15 +184,15 @@ export function useTable(items, { searchText, perPage = 10 } = {}) {
   };
 }
 
-export function TableToolbar({ table, onBulkDelete, placeholder = "Search…", right }) {
+export function TableToolbar({ table, onBulkDelete, right }) {
   const n = table.selected.size;
   return (
     <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
       <div className="relative w-full max-w-xs">
         <Search size={15} className="absolute left-3 top-2.5 text-muted" />
         <input value={table.query} onChange={(e) => { table.setQuery(e.target.value); table.setPage(1); }}
-          placeholder={placeholder}
-          className="w-full bg-canvas rounded-xl pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-100" />
+          aria-label="Search"
+          className="w-full bg-canvas rounded-xl pl-9 pr-3 py-2 text-sm outline-none" />
       </div>
       <div className="flex items-center gap-2">
         {right}

@@ -347,7 +347,7 @@ if (loading) {
                   required
                   value={compName}
                   onChange={(e) => setCompName(e.target.value)}
-                  className="px-3 py-2 w-full border border-slate-250 rounded text-xs focus:ring-1 focus:ring-blue-500 font-semibold text-slate-800 bg-slate-50/20 focus:outline-none"
+                  className="px-3 py-2 w-full border border-slate-250 rounded text-xs font-semibold text-slate-800 bg-slate-50/20 outline-none"
                 />
               </div>
 
@@ -358,7 +358,7 @@ if (loading) {
                   required
                   value={compEmail}
                   onChange={(e) => setCompEmail(e.target.value)}
-                  className="px-3 py-2 w-full border border-slate-250 rounded text-xs focus:ring-1 focus:ring-blue-500 text-slate-800 focus:outline-none"
+                  className="px-3 py-2 w-full border border-slate-250 rounded text-xs text-slate-800 outline-none"
                 />
               </div>
 
@@ -369,7 +369,7 @@ if (loading) {
                   required
                   value={compPhone}
                   onChange={(e) => setCompPhone(e.target.value)}
-                  className="px-3 py-2 w-full border border-slate-250 rounded text-xs focus:ring-1 focus:ring-blue-500 text-slate-800 focus:outline-none"
+                  className="px-3 py-2 w-full border border-slate-250 rounded text-xs text-slate-800 outline-none"
                 />
               </div>
 
@@ -380,7 +380,7 @@ if (loading) {
                   required
                   value={compAddress}
                   onChange={(e) => setCompAddress(e.target.value)}
-                  className="px-3 py-2 w-full border border-slate-250 rounded text-xs focus:ring-1 focus:ring-blue-500 text-slate-850 focus:outline-none"
+                  className="px-3 py-2 w-full border border-slate-250 rounded text-xs text-slate-850 outline-none"
                 />
               </div>
 
@@ -390,7 +390,7 @@ if (loading) {
                   type="text"
                   value={compLogoUrl}
                   onChange={(e) => setCompLogoUrl(e.target.value)}
-                  className="px-3 py-2 w-full border border-slate-250 rounded text-xs focus:ring-1 focus:ring-blue-500 font-mono text-slate-500 focus:outline-none"
+                  className="px-3 py-2 w-full border border-slate-250 rounded text-xs font-mono text-slate-500 outline-none"
                 />
               </div>
 
@@ -401,7 +401,7 @@ if (loading) {
                   required
                   value={compYear}
                   onChange={(e) => setCompYear(Number(e.target.value))}
-                  className="px-3 py-2 w-full border border-slate-250 rounded text-xs focus:ring-1 focus:ring-blue-500 text-slate-800 focus:outline-none"
+                  className="px-3 py-2 w-full border border-slate-250 rounded text-xs text-slate-800 outline-none"
                 />
               </div>
             </div>
@@ -441,7 +441,7 @@ if (loading) {
                     required
                     value={empSsnit}
                     onChange={(e) => setEmpSsnit(Number(e.target.value))}
-                    className="px-3 py-2 w-full border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:ring-1"
+                    className="px-3 py-2 w-full border border-slate-200 rounded-lg text-xs font-bold text-slate-800 outline-none"
                   />
                   <p className="text-[10px] text-slate-400 mt-1">Deducted from Employee Basic Salary (Default: 5.5%).</p>
                 </div>
@@ -454,7 +454,7 @@ if (loading) {
                     required
                     value={employerSsnit}
                     onChange={(e) => setEmployerSsnit(Number(e.target.value))}
-                    className="px-3 py-2 w-full border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:ring-1"
+                    className="px-3 py-2 w-full border border-slate-200 rounded-lg text-xs font-bold text-slate-800 outline-none"
                   />
                   <p className="text-[10px] text-slate-400 mt-1">Matched by Company directly (Default: 13.0%).</p>
                 </div>
@@ -471,7 +471,7 @@ if (loading) {
                     required
                     value={defaultHours}
                     onChange={(e) => setDefaultHours(Number(e.target.value))}
-                    className="px-3 py-2 w-full border border-slate-200 rounded-lg text-xs text-slate-800 focus:ring-1"
+                    className="px-3 py-2 w-full border border-slate-200 rounded-lg text-xs text-slate-800 outline-none"
                   />
                   <p className="text-[10px] text-slate-400 mt-1">Baseline daily shift count. Used for audits (Default: 8).</p>
                 </div>
@@ -491,7 +491,7 @@ if (loading) {
                     required
                     value={lateTargetTime}
                     onChange={(e) => setLateTargetTime(e.target.value)}
-                    className="px-3 py-2 w-full border border-slate-200 rounded-lg text-xs text-slate-800 focus:ring-1 bg-white"
+                    className="px-3 py-2 w-full border border-slate-200 rounded-lg text-xs text-slate-800 outline-none bg-white"
                   />
                   <p className="text-[10px] text-slate-400 mt-1">Standard daily shift target start (e.g. 08:00).</p>
                 </div>
@@ -504,7 +504,7 @@ if (loading) {
                     min="0"
                     value={lateGraceMins}
                     onChange={(e) => setLateGraceMins(Number(e.target.value))}
-                    className="px-3 py-2 w-full border border-slate-200 rounded-lg text-xs text-slate-800 focus:ring-1 bg-white"
+                    className="px-3 py-2 w-full border border-slate-200 rounded-lg text-xs text-slate-800 outline-none bg-white"
                   />
                   <p className="text-[10px] text-slate-400 mt-1">Allowed buffer past start time (e.g. 5 mins).</p>
                 </div>
@@ -518,7 +518,7 @@ if (loading) {
                     step="1"
                     value={lateDeductionRate}
                     onChange={(e) => setLateDeductionRate(Number(e.target.value))}
-                    className="px-3 py-2 w-full border border-slate-200 rounded-lg text-xs text-slate-800 focus:ring-1 bg-white"
+                    className="px-3 py-2 w-full border border-slate-200 rounded-lg text-xs text-slate-800 outline-none bg-white"
                   />
                   <p className="text-[10px] text-slate-400 mt-1">Penalty fee deducted per late strike (GHS).</p>
                 </div>
@@ -747,9 +747,9 @@ if (loading) {
         Create User
       </h3>
 
+      <label className="block text-xs font-bold mb-1">Full Name</label>
       <input
-        placeholder="Full Name"
-        className="w-full border p-2 rounded mb-3"
+        className="w-full border p-2 rounded mb-3 outline-none"
         value={newUser.full_name}
         onChange={(e) =>
           setNewUser({
@@ -759,9 +759,9 @@ if (loading) {
         }
       />
 
+      <label className="block text-xs font-bold mb-1">Username</label>
       <input
-        placeholder="Username"
-        className="w-full border p-2 rounded mb-3"
+        className="w-full border p-2 rounded mb-3 outline-none"
         value={newUser.username}
         onChange={(e) =>
           setNewUser({
@@ -771,9 +771,9 @@ if (loading) {
         }
       />
 
+      <label className="block text-xs font-bold mb-1">Email</label>
       <input
-        placeholder="Email"
-        className="w-full border p-2 rounded mb-3"
+        className="w-full border p-2 rounded mb-3 outline-none"
         value={newUser.email}
         onChange={(e) =>
           setNewUser({
@@ -783,10 +783,10 @@ if (loading) {
         }
       />
 
+      <label className="block text-xs font-bold mb-1">Password</label>
       <input
         type="password"
-        placeholder="Password"
-        className="w-full border p-2 rounded mb-3"
+        className="w-full border p-2 rounded mb-3 outline-none"
         value={newUser.password}
         onChange={(e) =>
           setNewUser({
@@ -842,10 +842,10 @@ if (loading) {
         {selectedUser?.full_name}
       </p>
 
+      <label className="block text-xs font-bold mb-1">New Password</label>
       <input
         type="password"
-        placeholder="New Password"
-        className="w-full border p-2 rounded mb-4"
+        className="w-full border p-2 rounded mb-4 outline-none"
         value={newPassword}
         onChange={(e) =>
           setNewPassword(e.target.value)

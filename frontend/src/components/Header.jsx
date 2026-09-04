@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, ChevronDown, CalendarDays, LogOut, User, Settings } from "lucide-react";
+import { ChevronDown, CalendarDays, LogOut, User, Settings } from "lucide-react";
 import { PAGE_TITLES } from "../config/nav";
 
 export default function Header({ authUser, activeTab, onLogout, setActiveTab }) {
@@ -25,13 +25,8 @@ export default function Header({ authUser, activeTab, onLogout, setActiveTab }) 
       </div>
 
       <div className="flex items-center gap-3">
-        <button className="relative grid place-items-center w-10 h-10 rounded-full hover:bg-canvas text-muted">
-          <Bell size={19} />
-          <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-cyan-400 ring-2 ring-white" />
-        </button>
-
         <div className="relative">
-          <button onClick={() => setOpen(!open)} className="flex items-center gap-2.5 rounded-full pl-1 pr-2 py-1 hover:bg-canvas">
+          <button onClick={() => setOpen(!open)} className="flex items-center gap-2.5 rounded-full pl-1 pr-2 py-1 transition-colors duration-150 hover:bg-canvas">
             <span className="grid place-items-center w-9 h-9 rounded-full bg-brand-500 text-white text-xs font-extrabold">{initials}</span>
             <div className="text-left hidden sm:block leading-tight">
               <p className="text-[13px] font-bold text-ink">{authUser?.fullName || "Admin"}</p>
@@ -40,11 +35,11 @@ export default function Header({ authUser, activeTab, onLogout, setActiveTab }) 
             <ChevronDown size={16} className="text-muted" />
           </button>
           {open && (
-            <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-line bg-white shadow-[var(--shadow-pop)] overflow-hidden">
-              <button className="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-canvas text-ink"><User size={16} /> My Profile</button>
-              <button onClick={() => { setActiveTab?.("settings"); setOpen(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-canvas text-ink"><Settings size={16} /> Account Settings</button>
+            <div className="absolute right-0 mt-2 w-56 rounded-xl border border-line bg-white shadow-[var(--shadow-pop)] overflow-hidden animate-[popIn_.16s_var(--ease-out)]">
+              <button className="w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 hover:bg-canvas text-ink"><User size={16} /> My Profile</button>
+              <button onClick={() => { setActiveTab?.("settings"); setOpen(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150 hover:bg-canvas text-ink"><Settings size={16} /> Account Settings</button>
               <div className="border-t border-line" />
-              <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50"><LogOut size={16} /> Log Out</button>
+              <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 transition-colors duration-150 hover:bg-red-50"><LogOut size={16} /> Log Out</button>
             </div>
           )}
         </div>

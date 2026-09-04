@@ -124,7 +124,7 @@ export default function Dashboard() {
               value={activeDate}
               max={new Date().toISOString().slice(0, 10)}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-canvas border border-line rounded-xl px-3 py-2 text-sm font-semibold text-ink focus:outline-none focus:ring-2 focus:ring-brand-100"
+              className="bg-canvas border border-line rounded-xl px-3 py-2 text-sm font-semibold text-ink outline-none"
             />
             <button
               onClick={() => setSelectedDate(new Date().toISOString().slice(0, 10))}
@@ -224,8 +224,8 @@ export default function Dashboard() {
         </div>
         <div className="relative mb-3">
           <Search size={15} className="absolute left-3 top-2.5 text-muted" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search employees"
-            className="w-full bg-canvas rounded-xl pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-100" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search employees"
+            className="w-full bg-canvas rounded-xl pl-9 pr-3 py-2 text-sm outline-none" />
         </div>
         <div className="space-y-1 max-h-[560px] overflow-y-auto -mx-1 px-1">
           {rows.map((r) => (

@@ -13,12 +13,11 @@ import { money, num } from "../utils/format";
 export const PALETTE = ["#0152d5", "#00c4f6", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#14b8a6", "#6366f1", "#84cc16"];
 
 /* ---------------------------------- Page header --------------------------- */
-export function PageHeader({ title, subtitle, children }) {
+export function PageHeader({ title, children }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
       <div>
         <h1 className="text-2xl font-extrabold text-ink">{title}</h1>
-        {subtitle && <p className="text-sm text-muted mt-1">{subtitle}</p>}
       </div>
       {children && <div className="flex items-center gap-2">{children}</div>}
     </div>
@@ -72,13 +71,13 @@ export function StatusChip({ status }) {
 }
 
 /* ---------------------------------- Toolbar ------------------------------- */
-export function Toolbar({ q, setQ, placeholder = "Search…", filters, onExport, children }) {
+export function Toolbar({ q, setQ, filters, onExport, children }) {
   return (
     <div className="flex flex-wrap items-center gap-2 mb-4">
       {setQ && (
         <div className="flex items-center gap-2 bg-white rounded-xl px-3 h-10 border border-line w-64 max-w-full">
           <Search size={16} className="text-muted" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={placeholder}
+          <input value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search"
             className="bg-transparent outline-none text-[13px] flex-1 text-ink" />
         </div>
       )}
@@ -105,7 +104,7 @@ export function Modal({ open, onClose, title, children, footer, wide }) {
           <button onClick={onClose} className="text-muted hover:text-ink"><X size={18} /></button>
         </div>
         <div className="p-5 max-h-[70vh] overflow-y-auto">{children}</div>
-        {footer && <div className="px-5 py-3.5 bg-canvas border-t border-line flex justify-end gap-2 rounded-b-[1.1rem]">{footer}</div>}
+        {footer && <div className="px-5 py-3.5 bg-canvas border-t border-line flex justify-end gap-2 rounded-b-[0.85rem]">{footer}</div>}
       </div>
     </div>
   );
@@ -120,8 +119,8 @@ export function Field({ label, children, required, className = "" }) {
     </label>
   );
 }
-export function TextInput(props) { return <input {...props} className={`input ${props.className || ""}`} />; }
-export function TextArea(props) { return <textarea {...props} className={`input ${props.className || ""}`} rows={props.rows || 3} />; }
+export function TextInput({ placeholder, ...props }) { return <input {...props} className={`input ${props.className || ""}`} />; }
+export function TextArea({ placeholder, ...props }) { return <textarea {...props} className={`input ${props.className || ""}`} rows={props.rows || 3} />; }
 export function Select({ children, ...props }) { return <select {...props} className={`input ${props.className || ""}`}>{children}</select>; }
 
 export function Grid2({ children }) { return <div className="grid sm:grid-cols-2 gap-4">{children}</div>; }
@@ -225,7 +224,7 @@ export function DataTable({ columns, rows, loading, empty = "No records found.",
           </thead>
           <tbody>
             {view.map((r, i) => (
-              <tr key={r.id || i} className={`hover:bg-canvas ${onRowClick ? "cursor-pointer" : ""}`} onClick={() => onRowClick?.(r)}>
+              <tr key={r.id || i} className={`transition-colors duration-150 hover:bg-canvas ${onRowClick ? "cursor-pointer" : ""}`} onClick={() => onRowClick?.(r)}>
                 {columns.map((c) => (
                   <td key={c.key} className="td" style={{ textAlign: c.align || "left" }}>
                     {c.render ? c.render(r) : r[c.key] ?? "—"}

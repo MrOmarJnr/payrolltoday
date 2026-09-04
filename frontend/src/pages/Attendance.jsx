@@ -321,10 +321,10 @@ EMP-2026-0001,2026-06-15 17:15:44`
           <Search className="absolute left-3 top-2.5 text-slate-400" size={14} />
           <input
             type="text"
-            placeholder="Search by ID or employee name..."
+            aria-label="Search by ID or employee name"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-4 py-2 w-full border border-slate-200 rounded text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none"
+            className="pl-9 pr-4 py-2 w-full border border-slate-200 rounded text-xs outline-none"
           />
         </div>
 
