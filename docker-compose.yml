@@ -65,7 +65,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    # No host port. The frontend nginx reaches it internally as http://backend:5000.
     expose:
       - "5000"
     logging:
@@ -82,17 +81,12 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
-    # No host port — only Caddy (below) is public. Internal-only on the
-    # compose network as http://frontend:80.
     expose:
       - "80"
     logging:
       driver: json-file
       options: { max-size: "10m", max-file: "3" }
 
-  # Terminates HTTPS for the real domain (automatic Let's Encrypt cert +
-  # renewal) and reverse-proxies everything to the frontend's nginx. This is
-  # the ONLY service with a public port.
   caddy:
     image: caddy:2-alpine
     container_name: lef-caddy
@@ -109,10 +103,6 @@ services:
       - "80:80"
       - "443:443"
 
-  # Optional DB admin UI. NOT started by default — run explicitly with:
-  #   docker compose --profile admin-tools up -d phpmyadmin
-  # and always reach it through an SSH tunnel, never by opening the port to
-  # the internet. Stop it again (`docker compose stop phpmyadmin`) when done.
   phpmyadmin:
     image: phpmyadmin:5.2
     container_name: lef-phpmyadmin
@@ -124,8 +114,6 @@ services:
       UPLOAD_LIMIT: 300M
     depends_on:
       - db
-    # Bound to localhost only. Reach it via an SSH tunnel, never the public net:
-    #   ssh -L 8081:127.0.0.1:8081 user@server   then open http://localhost:8081
     ports:
       - "127.0.0.1:${PMA_PORT:-8081}:80"
 
