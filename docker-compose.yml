@@ -1,20 +1,3 @@
-# ============================================================================
-#  LEF ERP — full stack: database + backend API + frontend + Caddy (TLS) +
-#  phpMyAdmin (optional, off by default)
-# ----------------------------------------------------------------------------
-#  SECURITY: Caddy is the ONLY public port (80/443). Everything else is
-#  internal to the compose network or bound to 127.0.0.1:
-#    - db is bound to 127.0.0.1 (reach it via an SSH tunnel, never publicly).
-#    - backend has no host port at all; Caddy -> frontend nginx -> backend.
-#    - phpMyAdmin only starts with `--profile admin-tools` and is bound to
-#      127.0.0.1 even then — it should never run unattended on a public box.
-#  External clients (mobile app, Hikvision agent) call the WEB URL over HTTPS,
-#  e.g. https://YOUR_DOMAIN/api/attendance-sync/... (proxied to the backend).
-#
-#  All secrets live in .env (never in this file or the images). Use STRONG,
-#  unique values — never "admin". Rotate every secret when moving to a new
-#  server; don't carry over values from a previous/compromised deployment.
-# ============================================================================
 
 services:
   db:
@@ -29,8 +12,6 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ./db/init:/docker-entrypoint-initdb.d:ro
-    # Bound to localhost only. NOT reachable from the internet.
-    # To use a DB tool from your laptop:  ssh -L 3306:127.0.0.1:3306 user@server
     ports:
       - "127.0.0.1:${DB_PORT:-3306}:3306"
     healthcheck:
@@ -38,10 +19,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-
-  # Nightly DB dump to a local, git-ignored volume. Copy dumps off-box
-  # regularly (rsync/S3/etc.) — a local-only backup doesn't survive the
-  # server itself being compromised or lost.
   db-backup:
     image: mariadb:10.11
     container_name: lef-db-backup
