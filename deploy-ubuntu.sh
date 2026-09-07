@@ -1,16 +1,25 @@
 #!/usr/bin/env bash
 # ============================================================================
-#  LEF ERP — one-shot deploy on a fresh Ubuntu server
+#  LEF ERP — one-time bootstrap on a fresh Ubuntu server
 # ----------------------------------------------------------------------------
-#  Usage:
-#     1. Copy this repo (or at least: docker-compose.yml, Caddyfile, .env,
-#        db/init/, and — if building on the server — backend/ & frontend/)
-#        to the server.
-#     2. Point your domain's A/AAAA record at this server's IP.
-#     3. cp .env.example .env   &&   nano .env      # real secrets + DOMAIN
-#     4. chmod +x deploy-ubuntu.sh && ./deploy-ubuntu.sh
+#  Run this ONCE to get the server ready. After that, GitHub Actions
+#  (.github/workflows/deploy.yml) handles every deploy automatically on
+#  push to main — it builds+pushes images to GHCR then SSHes in and runs
+#  `docker compose pull && up -d`. This script is what CI expects to find
+#  already in place (repo cloned, .env configured) before it can do that.
 #
-#  If you PUSHED images to Docker Hub, this pulls them. If not, it builds.
+#  Usage:
+#     1. git clone <this repo> and cd into it on the server.
+#     2. Point your domain's A/AAAA record at this server's IP.
+#     3. cp .env.example .env   &&   nano .env      # real secrets + DOMAIN + IMAGE_PREFIX
+#     4. chmod +x deploy-ubuntu.sh && ./deploy-ubuntu.sh
+#     5. Add the deploy secrets in GitHub (repo Settings -> Secrets -> Actions):
+#        DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY (private key for DEPLOY_USER),
+#        DEPLOY_PATH (absolute path to this cloned repo on the server).
+#
+#  If IMAGE_PREFIX in .env points at a registry with images already pushed,
+#  this pulls them. Otherwise it builds locally as a fallback (first run,
+#  before CI has ever pushed anything).
 #  Caddy handles HTTPS automatically once DNS points here — no certbot step.
 # ============================================================================
 set -euo pipefail

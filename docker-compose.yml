@@ -45,7 +45,7 @@ services:
 
   backend:
     build: ./backend
-    image: ${DOCKERHUB_USER:-lef}/lef-backend:${TAG:-latest}
+    image: ${IMAGE_PREFIX:-lef}/lef-backend:${TAG:-latest}
     container_name: lef-backend
     restart: unless-stopped
     environment:
@@ -76,7 +76,7 @@ services:
       context: ./frontend
       args:
         VITE_API_URL: ${VITE_API_URL:-/api}
-    image: ${DOCKERHUB_USER:-lef}/lef-frontend:${TAG:-latest}
+    image: ${IMAGE_PREFIX:-lef}/lef-frontend:${TAG:-latest}
     container_name: lef-frontend
     restart: unless-stopped
     depends_on:

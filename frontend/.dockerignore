@@ -7,3 +7,8 @@ dist
 .gitignore
 Dockerfile
 .dockerignore
+.vscode
+.idea
+coverage
+.github
+*.md

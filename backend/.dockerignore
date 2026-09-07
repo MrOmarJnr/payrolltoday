@@ -9,3 +9,8 @@ uploads
 Dockerfile
 .dockerignore
 backend.zip
+.vscode
+.idea
+coverage
+.github
+*.md
