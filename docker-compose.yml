@@ -1,124 +1,181 @@
-
 services:
+
+  # ============================================================
+  # MariaDB Database
+  # ============================================================
   db:
     image: mariadb:10.11
     container_name: lef-db
     restart: unless-stopped
+
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MARIADB_DATABASE: ${DB_NAME}
       MARIADB_USER: ${DB_USER}
       MARIADB_PASSWORD: ${DB_PASSWORD}
+
     volumes:
       - db_data:/var/lib/mysql
       - ./db/init:/docker-entrypoint-initdb.d:ro
+
+    # Localhost only - not exposed publicly
     ports:
       - "127.0.0.1:${DB_PORT:-3306}:3306"
+
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test:
+        [
+          "CMD",
+          "healthcheck.sh",
+          "--connect",
+          "--innodb_initialized"
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
+
+
+  # ============================================================
+  # Automatic Database Backups
+  # ============================================================
   db-backup:
     image: mariadb:10.11
     container_name: lef-db-backup
     restart: unless-stopped
+
     depends_on:
       db:
         condition: service_healthy
+
     environment:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+
     volumes:
       - ./db/backups:/backups
+
     entrypoint: >
       sh -c "
         echo 'DB backup service started — dumping every 24h, keeping 14 days.';
         while true; do
           FILE=/backups/lef_payroll_$$(date +%Y%m%d_%H%M%S).sql.gz;
-          mysqldump -h db -u $$DB_USER -p$$DB_PASSWORD $$DB_NAME | gzip > $$FILE && echo \"Backed up to $$FILE\";
+          mysqldump -h db -u $$DB_USER -p$$DB_PASSWORD $$DB_NAME |
+          gzip > $$FILE &&
+          echo \"Backed up to $$FILE\";
           find /backups -name '*.sql.gz' -mtime +14 -delete;
           sleep 86400;
         done
       "
 
+
+  # ============================================================
+  # Node.js Backend API
+  # ============================================================
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+
     image: ${IMAGE_PREFIX:-lef}/lef-backend:${TAG:-latest}
     container_name: lef-backend
     restart: unless-stopped
+
     environment:
       NODE_ENV: production
       PORT: 5000
+
       DB_HOST: db
       DB_PORT: 3306
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+
       SYNC_API_KEY: ${SYNC_API_KEY:-}
+
       FRONTEND_URL: ${FRONTEND_URL}
+
     volumes:
       - uploads_data:/app/uploads
+
     depends_on:
       db:
         condition: service_healthy
+
     expose:
       - "5000"
+
     logging:
       driver: json-file
-      options: { max-size: "10m", max-file: "3" }
+      options:
+        max-size: "10m"
+        max-file: "3"
 
+
+  # ============================================================
+  # React/Vite Frontend
+  # Internal container Nginx serves React and proxies /api
+  # ============================================================
   frontend:
     build:
       context: ./frontend
+
       args:
         VITE_API_URL: ${VITE_API_URL:-/api}
+
     image: ${IMAGE_PREFIX:-lef}/lef-frontend:${TAG:-latest}
     container_name: lef-frontend
     restart: unless-stopped
+
     depends_on:
       - backend
-    expose:
-      - "80"
+
+    # Host Nginx connects here.
+    # NOT publicly exposed.
+    ports:
+      - "127.0.0.1:8002:80"
+
     logging:
       driver: json-file
-      options: { max-size: "10m", max-file: "3" }
+      options:
+        max-size: "10m"
+        max-file: "3"
 
-  caddy:
-    image: caddy:2-alpine
-    container_name: lef-caddy
-    restart: unless-stopped
-    depends_on:
-      - frontend
-    environment:
-      DOMAIN: ${DOMAIN:-localhost}
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    ports:
-      - "80:80"
-      - "443:443"
 
+  # ============================================================
+  # phpMyAdmin
+  # Disabled normally.
+  #
+  # Start with:
+  # docker compose --profile admin-tools up -d phpmyadmin
+  # ============================================================
   phpmyadmin:
     image: phpmyadmin:5.2
     container_name: lef-phpmyadmin
     restart: unless-stopped
-    profiles: ["admin-tools"]
+
+    profiles:
+      - admin-tools
+
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
       UPLOAD_LIMIT: 300M
+
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
+    # Localhost only
     ports:
       - "127.0.0.1:${PMA_PORT:-8081}:80"
 
+
+# ==============================================================
+# Persistent Docker Volumes
+# ==============================================================
 volumes:
   db_data:
   uploads_data:
-  caddy_data:
-  caddy_config:
