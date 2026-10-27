@@ -543,12 +543,16 @@ async function processRawLogs() {
         }
 
         // Make sure employee exists
+        // row.employee_id is the device's Employee No. It is mapped to an app
+        // employee via employees.device_employee_no when set (this wins), and
+        // otherwise is the app ID itself.
         const [[employee]] = await pool.query(`
             SELECT id
             FROM employees
-            WHERE id=?
+            WHERE device_employee_no=? OR id=?
+            ORDER BY (device_employee_no=?) DESC
             LIMIT 1
-        `,[row.employee_id]);
+        `,[row.employee_id, row.employee_id, row.employee_id]);
 
         // Employee not created in the app yet: keep the log pending (imported=0)
         // so it is picked up automatically once the matching ID exists.

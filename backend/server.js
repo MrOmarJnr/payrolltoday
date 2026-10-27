@@ -142,6 +142,10 @@ app.use("/api/attendance-sync", attendanceSyncRoutes);
 
 const PORT = process.env.PORT || 5000;
 
+require("./utils/ensureSchema")().catch((err) =>
+  console.error("Schema check failed:", err.message)
+);
+
 app.listen(PORT,"0.0.0.0", () => {
   console.log(`LEF Payroll API running on port ${PORT}`);
 });

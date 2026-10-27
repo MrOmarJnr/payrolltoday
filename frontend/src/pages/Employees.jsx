@@ -29,6 +29,7 @@ export default function Employees() {
   const [editingEmployee, setEditingEmployee] = useState(null);
 
   const [formId, setFormId] = useState("");
+  const [deviceNo, setDeviceNo] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [otherNames, setOtherNames] = useState("");
@@ -131,6 +132,7 @@ export default function Employees() {
 
   const resetForm = () => {
     setFormId("");
+    setDeviceNo("");
     setFirstName("");
     setLastName("");
     setOtherNames("");
@@ -169,6 +171,7 @@ export default function Employees() {
     setEditingEmployee(emp);
 
     setFormId(emp.id);
+    setDeviceNo(emp.device_employee_no || "");
     setFirstName(emp.firstName || "");
     setLastName(emp.lastName || "");
     setOtherNames(emp.otherNames || "");
@@ -201,6 +204,7 @@ export default function Employees() {
 
   const buildPayload = () => ({
     employee_id: formId.trim(),
+    device_employee_no: deviceNo.trim(),
     first_name: firstName,
     last_name: lastName,
     other_names: otherNames,
@@ -743,16 +747,21 @@ Updated: ${response.data.updated}`
               <SectionTitle title="1. Profile Details & Contacts" />
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {editingEmployee ? (
-                  <div className="sm:col-span-3">
-                    <label className="block text-xs font-bold text-slate-600 mb-1">Employee ID</label>
-                    <div className="px-3 py-1.5 w-full border border-slate-100 bg-slate-50 rounded-lg text-xs text-slate-500">{formId}</div>
-                  </div>
-                ) : (
-                  <div className="sm:col-span-3">
+                <div className="sm:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {editingEmployee ? (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-600 mb-1">Employee ID</label>
+                      <div className="px-3 py-1.5 w-full border border-slate-100 bg-slate-50 rounded-lg text-xs text-slate-500">{formId}</div>
+                    </div>
+                  ) : (
                     <TextInput label="Employee ID * (same as the Employee No. in iVMS, e.g. LSEMP001 or LSEMP100)" value={formId} setValue={setFormId} required />
+                  )}
+
+                  <div>
+                    <TextInput label="iVMS Employee No. (only if different)" value={deviceNo} setValue={setDeviceNo} />
+                    <p className="text-[10px] text-slate-400 mt-1">Leave blank when the iVMS number is the same as the Employee ID.</p>
                   </div>
-                )}
+                </div>
 
                 <TextInput label="First Name *" value={firstName} setValue={setFirstName} required />
                 <TextInput label="Last Name *" value={lastName} setValue={setLastName} required />

@@ -130,6 +130,40 @@ async function nextEmployeeId(db) {
 }
 
 /*
+| Saves the Hikvision/iVMS Employee No. for an employee (blank = same as ID).
+| Returns an error message if invalid or already linked to someone else.
+| It may equal another employee's ID on purpose (e.g. two people whose
+| numbers are swapped between the app and iVMS): the mapping wins in the sync.
+*/
+async function saveDeviceNo(conn, employeeId, raw) {
+  const deviceNo = String(raw || "").trim() || null;
+
+  if (deviceNo) {
+    if (!/^[A-Za-z0-9_-]{1,50}$/.test(deviceNo)) {
+      return "iVMS Employee No. may only contain letters, numbers, dashes and underscores.";
+    }
+
+    const [clash] = await conn.query(
+      `SELECT id FROM employees
+       WHERE device_employee_no = ? AND id <> ?
+       LIMIT 1`,
+      [deviceNo, employeeId]
+    );
+
+    if (clash.length > 0) {
+      return `iVMS Employee No. ${deviceNo} is already linked to ${clash[0].id}.`;
+    }
+  }
+
+  await conn.query(
+    "UPDATE employees SET device_employee_no = ? WHERE id = ?",
+    [deviceNo, employeeId]
+  );
+
+  return null;
+}
+
+/*
 |--------------------------------------------------------------------------
 | CREATE EMPLOYEE
 |--------------------------------------------------------------------------
@@ -256,6 +290,17 @@ const createEmployee = async (req, res) => {
         photo_url,
       ]
     );
+
+    const deviceNoError = await saveDeviceNo(
+      conn,
+      employeeId,
+      req.body.device_employee_no
+    );
+
+    if (deviceNoError) {
+      await conn.rollback();
+      return res.status(409).json({ success: false, message: deviceNoError });
+    }
 
     await conn.query(
       `
@@ -429,6 +474,20 @@ const updateEmployee = async (req, res) => {
         id,
       ]
     );
+
+    // Only when sent: other callers (e.g. deactivate) omit it and must not clear it.
+    if (req.body.device_employee_no !== undefined) {
+      const deviceNoError = await saveDeviceNo(
+        conn,
+        id,
+        req.body.device_employee_no
+      );
+
+      if (deviceNoError) {
+        await conn.rollback();
+        return res.status(409).json({ success: false, message: deviceNoError });
+      }
+    }
 
     // Salary Details
   await conn.query(
