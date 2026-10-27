@@ -134,10 +134,8 @@ router.post("/hikvision", async (req, res) => {
       const eventTime = toMysqlDateTime(event.time);
       if (!eventTime) { skipped++; continue; }
 
-      // Only stage events for known employees (device employee no == LEF employee id)
-      const [[emp]] = await pool.query("SELECT id FROM employees WHERE id = ? LIMIT 1", [employeeNo]);
-      if (!emp) { skipped++; continue; }
-
+      // Stage all events; ones whose device employee no has no LEF employee yet
+      // stay pending in processRawLogs() until that employee is created.
       const [r] = await pool.query(
         `INSERT IGNORE INTO hikvision_raw_logs
            (serial_no, employee_id, employee_name, event_type, event_time, source, raw_json)

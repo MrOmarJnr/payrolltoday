@@ -470,21 +470,9 @@ async function syncEvents() {
       continue;
     }
 
-    const [[employee]] = await pool.query(
-      `
-      SELECT id
-      FROM employees
-      WHERE id=?
-      LIMIT 1
-      `,
-      [employeeNo]
-    );
-
-    if (!employee) {
-      skipped++;
-      continue;
-    }
-
+    // Stage every scan, even if the employee isn't in the app yet (e.g. added
+    // to iVMS first). processRawLogs leaves those pending until the employee
+    // is created, so no attendance is lost.
     await pool.query(
       `
       INSERT IGNORE INTO hikvision_raw_logs
@@ -562,14 +550,9 @@ async function processRawLogs() {
             LIMIT 1
         `,[row.employee_id]);
 
+        // Employee not created in the app yet: keep the log pending (imported=0)
+        // so it is picked up automatically once the matching ID exists.
         if(!employee){
-
-            await pool.query(`
-                UPDATE hikvision_raw_logs
-                SET imported=1
-                WHERE id=?
-            `,[row.id]);
-
             skipped++;
             continue;
         }
@@ -593,7 +576,7 @@ async function processRawLogs() {
         )
     `,[
         row.serial_no,
-        row.employee_id,
+        employee.id,
         row.employee_name,
         row.event_type,
         row.event_time,
@@ -607,7 +590,7 @@ async function processRawLogs() {
     }
 
     console.log(
-        `Duplicate skipped -> ${row.employee_id} ${row.event_time}`
+        `Duplicate skipped -> ${employee.id} ${row.event_time}`
     );
 
 }
@@ -618,7 +601,7 @@ async function processRawLogs() {
 
             const result =
                 await updateAttendanceForEmployeeDay(
-                    row.employee_id,
+                    employee.id,
                     attendanceDate
                 );
 

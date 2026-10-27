@@ -109,6 +109,28 @@ const getEmployee = async (req, res) => {
 
 /*
 |--------------------------------------------------------------------------
+| NEXT EMPLOYEE ID
+|--------------------------------------------------------------------------
+*/
+
+async function nextEmployeeId(db) {
+  const [lastEmployee] = await db.query(`
+    SELECT id
+    FROM employees
+    WHERE id LIKE 'LSEMP%'
+    ORDER BY CAST(SUBSTRING(id, 6) AS UNSIGNED) DESC
+    LIMIT 1
+  `);
+
+  if (lastEmployee.length === 0) return "LSEMP001";
+
+  const lastNumber = parseInt(lastEmployee[0].id.replace("LSEMP", ""), 10);
+
+  return `LSEMP${String(lastNumber + 1).padStart(3, "0")}`;
+}
+
+/*
+|--------------------------------------------------------------------------
 | CREATE EMPLOYEE
 |--------------------------------------------------------------------------
 */
@@ -148,24 +170,39 @@ const createEmployee = async (req, res) => {
       other_deductions,
     } = req.body;
 
-          const [lastEmployee] = await conn.query(`
-          SELECT id
-          FROM employees
-          WHERE id LIKE 'LSEMP%'
-          ORDER BY CAST(SUBSTRING(id, 6) AS UNSIGNED) DESC
-          LIMIT 1
-        `);
+    // HR types the ID (it must equal the Employee No. enrolled in iVMS, and
+    // permanent/temporary staff use different ranges); blank falls back to
+    // the next LSEMP number.
+    const requestedId = String(req.body.employee_id || "").trim();
+    let employeeId;
 
-        let employeeId = "LSEMP001";
+    if (requestedId) {
+      if (!/^[A-Za-z0-9_-]{1,50}$/.test(requestedId)) {
+        await conn.rollback();
+        return res.status(400).json({
+          success: false,
+          message:
+            "Employee ID may only contain letters, numbers, dashes and underscores.",
+        });
+      }
 
-        if (lastEmployee.length > 0) {
-          const lastNumber = parseInt(
-            lastEmployee[0].id.replace("LSEMP", ""),
-            10
-          );
+      const [taken] = await conn.query(
+        "SELECT id FROM employees WHERE id = ? LIMIT 1",
+        [requestedId]
+      );
 
-          employeeId = `LSEMP${String(lastNumber + 1).padStart(3, "0")}`;
-        }
+      if (taken.length > 0) {
+        await conn.rollback();
+        return res.status(409).json({
+          success: false,
+          message: `Employee ID ${requestedId} already exists.`,
+        });
+      }
+
+      employeeId = requestedId;
+    } else {
+      employeeId = await nextEmployeeId(conn);
+    }
 
     await conn.query(
       `

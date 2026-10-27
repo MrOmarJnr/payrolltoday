@@ -200,6 +200,7 @@ export default function Employees() {
   };
 
   const buildPayload = () => ({
+    employee_id: formId.trim(),
     first_name: firstName,
     last_name: lastName,
     other_names: otherNames,
@@ -742,6 +743,17 @@ Updated: ${response.data.updated}`
               <SectionTitle title="1. Profile Details & Contacts" />
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {editingEmployee ? (
+                  <div className="sm:col-span-3">
+                    <label className="block text-xs font-bold text-slate-600 mb-1">Employee ID</label>
+                    <div className="px-3 py-1.5 w-full border border-slate-100 bg-slate-50 rounded-lg text-xs text-slate-500">{formId}</div>
+                  </div>
+                ) : (
+                  <div className="sm:col-span-3">
+                    <TextInput label="Employee ID * (same as the Employee No. in iVMS, e.g. LSEMP001 or LSEMP100)" value={formId} setValue={setFormId} required />
+                  </div>
+                )}
+
                 <TextInput label="First Name *" value={firstName} setValue={setFirstName} required />
                 <TextInput label="Last Name *" value={lastName} setValue={setLastName} required />
                 <TextInput label="Other Names" value={otherNames} setValue={setOtherNames} />
