@@ -9,8 +9,10 @@ import {
   Edit2,
   Trash2,
   CheckCircle2,
+  Download,
 } from "lucide-react";
 import api from "../services/api";
+import { exportCsv } from "../utils/format";
 import { usePager, Pager } from "./_shiftui";
 
 export default function Attendance() {
@@ -32,6 +34,11 @@ export default function Attendance() {
   const [clockIn, setClockIn] = useState("08:00");
   const [clockOut, setClockOut] = useState("17:00");
   const [status, setStatus] = useState("Present");
+
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [exportFrom, setExportFrom] = useState("");
+  const [exportTo, setExportTo] = useState("");
+  const [exportError, setExportError] = useState("");
 
   const [showDeviceSim, setShowDeviceSim] = useState(false);
   const [syncFeedback, setSyncFeedback] = useState(null);
@@ -263,6 +270,54 @@ EMP-2026-0001,2026-06-15 17:15:44`
     }
   };
 
+  const handleOpenExport = () => {
+    setExportFrom(`${today.slice(0, 7)}-01`);
+    setExportTo(today);
+    setExportError("");
+    setIsExportOpen(true);
+  };
+
+  // Exports every log in the chosen range, independent of the on-screen
+  // search/date/status filters.
+  const handleExport = (e) => {
+    e.preventDefault();
+
+    if (!exportFrom || !exportTo) {
+      setExportError("Choose both a start and an end date.");
+      return;
+    }
+    if (exportFrom > exportTo) {
+      setExportError("The start date can't be after the end date.");
+      return;
+    }
+
+    const rows = attendanceLogs
+      .filter((log) => log.date >= exportFrom && log.date <= exportTo)
+      .sort((a, b) => a.date.localeCompare(b.date) || a.employeeId.localeCompare(b.employeeId))
+      .map((log) => {
+        const emp = employees.find((x) => x.id === log.employeeId);
+        return {
+          "Employee ID": log.employeeId,
+          Name: emp ? `${emp.firstName} ${emp.lastName}` : "Unknown employee",
+          Position: emp?.position || "",
+          Date: log.date,
+          "Clock In": log.clockIn,
+          "Clock Out": log.clockOut,
+          "Hours Worked": log.hoursWorked,
+          Status: log.status,
+          Source: log.source,
+        };
+      });
+
+    if (rows.length === 0) {
+      setExportError("No attendance records between those dates.");
+      return;
+    }
+
+    exportCsv(`attendance_${exportFrom}_to_${exportTo}`, rows);
+    setIsExportOpen(false);
+  };
+
   const filteredLogs = attendanceLogs
     .filter((log) => {
       const emp = employees.find((e) => e.id === log.employeeId);
@@ -302,7 +357,13 @@ EMP-2026-0001,2026-06-15 17:15:44`
         </div>
 
         <div className="flex gap-2 w-full md:w-auto">
-        
+          <button
+            onClick={handleOpenExport}
+            className="flex-1 md:flex-none bg-white hover:bg-slate-50 text-slate-700 text-xs px-4 py-2 rounded font-medium border border-slate-200 flex items-center justify-center gap-1.5"
+          >
+            <Download size={14} />
+            Export
+          </button>
 
           <button
             onClick={handleOpenCreateLog}
@@ -477,6 +538,69 @@ EMP-2026-0001,2026-06-15 17:15:44`
           </div>
         )}
       </div>
+
+      {isExportOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm border border-slate-100 shadow-2xl overflow-hidden">
+            <div className="bg-slate-50 border-b border-slate-100 p-5 flex justify-between items-center">
+              <h3 className="text-sm font-bold text-slate-800">Export Attendance</h3>
+              <button onClick={() => setIsExportOpen(false)} className="text-slate-400 hover:text-slate-600">
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleExport}>
+              <div className="p-5 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">From *</label>
+                    <input
+                      type="date"
+                      required
+                      value={exportFrom}
+                      onChange={(e) => { setExportFrom(e.target.value); setExportError(""); }}
+                      className="px-3 py-1.5 w-full border border-slate-200 rounded-lg text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">To *</label>
+                    <input
+                      type="date"
+                      required
+                      value={exportTo}
+                      onChange={(e) => { setExportTo(e.target.value); setExportError(""); }}
+                      className="px-3 py-1.5 w-full border border-slate-200 rounded-lg text-xs"
+                    />
+                  </div>
+                </div>
+
+                {exportError && (
+                  <p role="alert" className="text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">
+                    {exportError}
+                  </p>
+                )}
+              </div>
+
+              <div className="bg-slate-50 p-4 border-t border-slate-100 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsExportOpen(false)}
+                  className="px-4 py-2 text-xs font-medium text-slate-600 border border-slate-200 rounded bg-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded flex items-center gap-1.5"
+                >
+                  <Download size={14} />
+                  Export CSV
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-3xs flex items-center justify-center p-4">
