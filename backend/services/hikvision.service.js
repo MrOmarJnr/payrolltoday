@@ -88,9 +88,7 @@ function calculateHours(firstScan, lastScan, scanCount) {
 async function getAttendanceStatus(firstScan) {
 
   const [[settings]] = await pool.query(`
-      SELECT
-          late_target_time,
-          late_grace_mins
+      SELECT late_target_time
       FROM company_settings
       LIMIT 1
   `);
@@ -109,9 +107,7 @@ async function getAttendanceStatus(firstScan) {
   const cutoff = new Date(firstScan);
 
   cutoff.setHours(hour);
-  cutoff.setMinutes(
-      minute + Number(settings.late_grace_mins)
-  );
+  cutoff.setMinutes(minute);
   cutoff.setSeconds(second);
 
   if (clockIn > cutoff) {

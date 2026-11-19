@@ -50,10 +50,10 @@ function parts(ts) {
 
 async function computeStatus(time) {
   try {
-    const [[cs]] = await pool.query("SELECT late_target_time, late_grace_mins FROM company_settings LIMIT 1");
+    const [[cs]] = await pool.query("SELECT late_target_time FROM company_settings LIMIT 1");
     if (!cs || !cs.late_target_time) return "Present";
     const [th, tm, tss = 0] = String(cs.late_target_time).split(":").map(Number);
-    const threshold = th * 3600 + tm * 60 + Number(tss) + Number(cs.late_grace_mins || 0) * 60;
+    const threshold = th * 3600 + tm * 60 + Number(tss);
     const [ch, cm, css = 0] = time.split(":").map(Number);
     return (ch * 3600 + cm * 60 + Number(css)) > threshold ? "Late" : "Present";
   } catch { return "Present"; }

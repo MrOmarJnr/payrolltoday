@@ -34,7 +34,6 @@ const [employerSsnit, setEmployerSsnit] = useState(13);
 const [defaultHours, setDefaultHours] = useState(8);
 
 // Lateness Settings
-const [lateGraceMins, setLateGraceMins] = useState(5);
 const [lateTargetTime, setLateTargetTime] = useState("08:00:00");
 const [lateDeductionRate, setLateDeductionRate] = useState(50);
 
@@ -148,10 +147,6 @@ const loadSettings = async () => {
       Number(company.default_working_hours || 8)
     );
 
-    setLateGraceMins(
-      Number(company.late_grace_mins || 5)
-    );
-
     setLateTargetTime(
       company.late_target_time || "08:00:00"
     );
@@ -198,7 +193,6 @@ const handleSaveSsnit = async (e) => {
       employer_ssnit_rate: employerSsnit,
       default_working_hours: defaultHours,
       late_target_time: lateTargetTime,
-      late_grace_mins: lateGraceMins,
       late_deduction_rate: lateDeductionRate,
     });
 
@@ -480,10 +474,10 @@ if (loading) {
 
             <div className="border-t border-slate-100 pt-5 text-left space-y-4">
               <div>
-                <h3 className="font-extrabold text-slate-850 text-sm">Lateness Deduction & Grace Rules</h3>
-                <p className="text-slate-400 text-xs mt-0.5">Define employee shifts start parameters, allowable buffer mins, and salary charge deductions per late incident.</p>
+                <h3 className="font-extrabold text-slate-850 text-sm">Lateness Deduction Rules</h3>
+                <p className="text-slate-400 text-xs mt-0.5">Define the shift start time and the salary deduction per late incident. Anyone clocking in after the start time is late.</p>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-semibold text-slate-600">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold text-slate-600">
                 <div>
                   <label className="block text-xs font-bold mb-1">Expected Clock-In Time *</label>
                   <input
@@ -494,19 +488,6 @@ if (loading) {
                     className="px-3 py-2 w-full border border-slate-200 rounded-lg text-xs text-slate-800 outline-none bg-white"
                   />
                   <p className="text-[10px] text-slate-400 mt-1">Standard daily shift target start (e.g. 08:00).</p>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold mb-1">Grace Period (Minutes) *</label>
-                  <input
-                    type="number"
-                    required
-                    min="0"
-                    value={lateGraceMins}
-                    onChange={(e) => setLateGraceMins(Number(e.target.value))}
-                    className="px-3 py-2 w-full border border-slate-200 rounded-lg text-xs text-slate-800 outline-none bg-white"
-                  />
-                  <p className="text-[10px] text-slate-400 mt-1">Allowed buffer past start time (e.g. 5 mins).</p>
                 </div>
 
                 <div>

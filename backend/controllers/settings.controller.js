@@ -83,7 +83,6 @@ const updatePayrollSettings = async (req, res) => {
       employer_ssnit_rate,
       default_working_hours,
       late_target_time,
-      late_grace_mins,
       late_deduction_rate,
     } = req.body;
 
@@ -95,7 +94,6 @@ const updatePayrollSettings = async (req, res) => {
         employer_ssnit_rate=?,
         default_working_hours=?,
         late_target_time=?,
-        late_grace_mins=?,
         late_deduction_rate=?
       WHERE id=1
       `,
@@ -104,7 +102,6 @@ const updatePayrollSettings = async (req, res) => {
         employer_ssnit_rate,
         default_working_hours,
         late_target_time,
-        late_grace_mins,
         late_deduction_rate,
       ]
     );

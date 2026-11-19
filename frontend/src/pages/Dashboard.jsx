@@ -19,7 +19,7 @@ export default function Dashboard() {
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [logs, setLogs] = useState([]);
-  const [lateThreshold, setLateThreshold] = useState(510); // 08:30 default
+  const [lateThreshold, setLateThreshold] = useState(480); // 08:00 default
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("logged");
   const [q, setQ] = useState("");
@@ -35,7 +35,7 @@ export default function Dashboard() {
         const c = s?.data?.company;
         if (c?.late_target_time) {
           const [th, tm] = String(c.late_target_time).split(":").map(Number);
-          setLateThreshold(th * 60 + (tm || 0) + Number(c.late_grace_mins || 0));
+          setLateThreshold(th * 60 + (tm || 0));
         }
       } catch (err) { console.error(err); } finally { setLoading(false); }
     })();
@@ -43,7 +43,7 @@ export default function Dashboard() {
 
   const empById = useMemo(() => Object.fromEntries(employees.map((e) => [e.id, e])), [employees]);
   const dateKey = (l) => String(l.attendance_date).slice(0, 10);
-  // A clocked-in log is LATE if its clock-in is past the (target + grace) threshold,
+  // A clocked-in log is LATE if its clock-in is past the target time,
   // OR the backend already stored it as Late. Consistent everywhere.
   const isLate = (l) => l.clock_in && (l.status === "Late" || (toMin(l.clock_in) != null && toMin(l.clock_in) > lateThreshold));
 
